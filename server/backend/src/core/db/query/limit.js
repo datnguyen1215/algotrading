@@ -1,10 +1,10 @@
 /**
  * Create limit query.
  * @param {number} limit
- * @returns
+ * @returns {string}
  */
 const limit = limit => {
-  if (!limit) return "";
+  if (!limit) return '';
 
   return `LIMIT ${limit}`;
 };

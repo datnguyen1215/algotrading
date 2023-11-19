@@ -1,41 +1,40 @@
 /**
  * @typedef {object} Candle
+ * @property {number|string} [id]
+ * @property {string} symbol
  * @property {number} open
  * @property {number} high
  * @property {number} low
  * @property {number} close
- * @property {number} time
+ * @property {string|number} time
  */
-import db from "@/core/db";
-import format from "pg-format";
+import db from '@/core/db';
+import format from 'pg-format';
 
 /**
  * Insert candle data into the database.
  * @param {Candle[]} data
- * @returns {Promise<QueryResult>}
+ * @returns {Promise<Candle[]>}
  */
 const insert = async data => {
-  try {
-    const values = data.map(({ time, open, high, low, close }) => [
-      time,
-      open,
-      high,
-      low,
-      close
-    ]);
+  const values = data.map(({ symbol, time, open, high, low, close }) => [
+    symbol,
+    time,
+    open,
+    high,
+    low,
+    close
+  ]);
 
-    const res = await db.query(
-      format(
-        `INSERT INTO candles (time, open, high, low, close) VALUES %L`,
-        values
-      )
-    );
+  // there's no need to collect any data
+  const { rows } = await db.query.send(
+    format(
+      `INSERT INTO candles (symbol, time, open, high, low, close) VALUES %L RETURNING *`,
+      values
+    )
+  );
 
-    // if everything is good, just return the data.
-    return { data };
-  } catch (error) {
-    return { error };
-  }
+  return rows.map(x => ({ ...x, time: x.time.toISOString() }));
 };
 
 export default insert;

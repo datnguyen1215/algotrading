@@ -1,4 +1,5 @@
-import insert from "./insert";
+import insert from './insert';
+import get from './get';
 
-export { insert };
-export default { insert };
+export { insert, get };
+export default { insert, get };

@@ -1,4 +1,5 @@
-import query from "./query";
+import query from './query';
+import candles from './candles';
 
-export { query };
-export default { query };
+export { query, candles };
+export default { query, candles };

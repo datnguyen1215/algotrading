@@ -1,10 +1,10 @@
 /**
  * Create offset query.
  * @param {number} offset
- * @returns
+ * @returns {string}
  */
 const offset = offset => {
-  if (!offset) return "";
+  if (!offset) return '';
 
   return `OFFSET ${offset}`;
 };
