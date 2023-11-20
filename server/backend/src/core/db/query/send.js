@@ -1,5 +1,5 @@
-import Configuration from '@/configuration';
-import errors from '@/core/errors';
+import Configuration from '@src/configuration';
+import errors from '@src/core/errors';
 import pg from 'pg';
 
 const pool = new pg.Pool({

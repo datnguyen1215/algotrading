@@ -8,7 +8,7 @@
  * @property {number} close
  * @property {string|number} time
  */
-import db from '@/core/db';
+import db from '@src/core/db';
 import format from 'pg-format';
 
 /**

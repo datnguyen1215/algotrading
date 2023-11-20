@@ -1,5 +1,5 @@
 import format from 'pg-format';
-import db from '@/core/db';
+import db from '@src/core/db';
 import candles from '.';
 import assert from 'assert';
 

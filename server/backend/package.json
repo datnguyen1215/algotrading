@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "candles:insert": "babel-node src/scripts/database/insert-candles.js",
+    "candles:insert": "babel-node scripts/insert-candles.js",
     "db:reset": "npm run db:cleanup && npm run db:setup",
     "db:setup": "export $(xargs < .env) && psql -f scripts/database/schema.sql $DATABASE_URL",
     "db:cleanup": "export $(xargs < .env) && psql -f scripts/database/cleanup.sql $DATABASE_URL",
-    "test": "mocha --require @babel/register --require src/alias.js --require dotenv/config --recursive --exit"
+    "test": "mocha --require @babel/register --require alias.js --require dotenv/config --recursive --exit"
   },
   "author": "",
   "license": "ISC",

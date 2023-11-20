@@ -1,6 +1,6 @@
 import assert from 'assert';
 import insert from './insert';
-import db from '@/core/db';
+import db from '@src/core/db';
 
 describe('core/db/candles/insert', () => {
   describe('module exports', () => {
