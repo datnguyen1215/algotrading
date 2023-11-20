@@ -4,13 +4,12 @@
  * @returns {string}
  */
 const order = options => {
-  if (!options || !options.length) return '';
+  if (!options) return '';
 
-  const order = options.map(({ column, by }) => {
-    if (!column || !by) return '';
+  // filter out empty options
+  options = options.filter(x => x && x.column && x.by);
 
-    return `${column} ${by}`;
-  });
+  const order = options.map(({ column, by }) => `${column} ${by}`);
 
   return `ORDER BY ${order.join(', ')}`;
 };

@@ -18,7 +18,7 @@ const send = async str => {
   } catch (err) {
     throw errors.create({
       message: err.message,
-      code: err.code,
+      code: errors.codes.Database.DB_QUERY_ERROR,
       stack: err.stack
     });
   }
