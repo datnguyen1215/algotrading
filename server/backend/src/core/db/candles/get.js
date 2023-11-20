@@ -42,7 +42,7 @@ const get = async options => {
         db.query.eq({ column: 'time', value: time ? format('%L', time) : null })
       )
     ),
-    db.query.order([{ column: 'time', by: 'DESC' }]),
+    db.query.order([{ column: 'time', by: 'ASC' }]),
     db.query.limit(limit),
     db.query.offset(offset)
   );
