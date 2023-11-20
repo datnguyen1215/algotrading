@@ -4,6 +4,9 @@ const Configuration = {
   },
   data: {
     candles: process.env.DATA_FILE
+  },
+  http: {
+    port: parseInt(process.env.HTTP_PORT)
   }
 };
 

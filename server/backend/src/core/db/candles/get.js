@@ -21,6 +21,8 @@ import format from 'pg-format';
  * @param {GetCandlesOptions} options
  */
 const get = async options => {
+  if (!options) throw new Error('options is required.');
+
   const { filter = {}, limit = 100, offset = 0 } = options;
   const { symbol, from, to, time } = filter;
 
@@ -44,7 +46,7 @@ const get = async options => {
     db.query.limit(limit),
     db.query.offset(offset)
   );
-
+  
   const { rows } = await db.query.send(queryStr);
 
   return rows.map(x => ({ ...x, time: x.time.toISOString() }));

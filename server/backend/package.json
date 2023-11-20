@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "candles:insert": "babel-node scripts/insert-candles.js",
+    "server:start": "nodemon --exec babel-node src/index.js",
     "db:reset": "npm run db:cleanup && npm run db:setup",
     "db:setup": "export $(xargs < .env) && psql -f scripts/database/schema.sql $DATABASE_URL",
     "db:cleanup": "export $(xargs < .env) && psql -f scripts/database/cleanup.sql $DATABASE_URL",

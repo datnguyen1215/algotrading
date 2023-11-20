@@ -2,7 +2,7 @@
  * @typedef {object} ErrorOptions
  * @property {string} [message]
  * @property {string} [stack]
- * @property {string} [code]
+ * @property {number} [code]
  */
 
 /**
