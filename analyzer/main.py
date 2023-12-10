@@ -9,6 +9,7 @@ import datetime
 import joblib
 import env
 import os
+from simulation.trade import Trade
 from tensorflow.keras.models import load_model
 
 COLUMNS_TO_KEEP = [
@@ -151,8 +152,37 @@ def simulate():
     data_5m.dropna(inplace=True)
 
     predictions = model.predict(data_5m[COLUMNS_TO_KEEP])
-    print(predictions)
 
+    # get the exact prediction based on multi-class classification
+    predictions = predictions.argmax(axis=1)
+
+    data_5m["prediction"] = predictions.round().astype(int)
+    
+    # iterate through the predictions and make trades
+    trades = []
+    for index, row in data_5m.iterrows():
+        if row["prediction"] > 4:
+            t = Trade(env.SYMBOL, 1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
+            trades.append(t)
+            print(f"Buy at {row['close']} at {index}: {t.profit}")
+        elif row["prediction"] < 4:
+            t = Trade(env.SYMBOL, -1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
+            trades.append(t)
+            print(f"Sell at {row['close']} at {index}: {t.profit}")
+            
+    # calculate profits from all trades with self.profit using for loop
+    profits = sum([t.profit for t in trades])
+    print("Profits: " + str(profits))
+
+    winning_trades = [t for t in trades if t.profit > 0]
+    print("Winning trades: " + str(len(winning_trades)))
+
+    losing_trades = [t for t in trades if t.profit < 0]
+    print("Losing trades: " + str(len(losing_trades)))
+
+    # calcculate win percentage
+    win_percentage = len(winning_trades) / len(trades) * 100
+    print(f"Win percentage: {win_percentage}%")
 
 # get candles and plot
 def main():
