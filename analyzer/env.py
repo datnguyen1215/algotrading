@@ -1,3 +1,9 @@
 import os
+from dotenv import load_dotenv
 
-MODEL_NAME=os.getenv("MODEL_NAME")
+load_dotenv()
+
+MODEL_PATH=os.getenv("MODEL_PATH")
+SCALER_PATH=os.getenv("SCALER_PATH")
+SYMBOL=os.getenv("SYMBOL")
+N_CANDLES=os.getenv("N_CANDLES")

@@ -8,8 +8,8 @@ import math
 from sklearn.preprocessing import MinMaxScaler
 
 # get candles from http://localhost:3005/api/candles
-def get():
-    url = "http://localhost:3005/api/candles?limit=5000&symbol=GBPUSD"
+def get(symbol, n_candles=5000):
+    url = f"http://localhost:3005/api/candles?limit={n_candles}&filter[symbol]={symbol}"
     r = requests.get(url)
     candles = r.json()
     return candles_to_df(candles)
@@ -256,14 +256,6 @@ def add_indicators(df):
 
     # filter prices that do not change
     df["changes"] = df["close"].diff() / 0
-
-    df["target"] = df["prev_close_slope_angle"]
-
-    # remove target outliers
-    Q1 = df["target"].quantile(0.25)
-    Q3 = df["target"].quantile(0.75)
-    IQR = Q3 - Q1
-    df = df[~((df["target"] < (Q1 - 1.5 * IQR)) | (df["target"] > (Q3 + 1.5 * IQR)))]
 
     df.dropna(inplace=True)
 
