@@ -232,27 +232,10 @@ def add_indicators(df):
     df["bb_20_2_diff"] = df["bb_upper_20_2"] - df["bb_lower_20_2"]
 
     # price difference of the next candle
-    next_1_close_diff = df["close"].shift(-1) - df["close"]
-    next_2_close_diff = df["close"].shift(-2) - df["close"]
-    next_3_close_diff = df["close"].shift(-3) - df["close"]
-    next_4_close_diff = df["close"].shift(-4) - df["close"]
-    next_5_close_diff = df["close"].shift(-5) - df["close"]
-    df["avg_next_close"] = (
-        next_1_close_diff
-        + next_2_close_diff
-        + next_3_close_diff
-        + next_4_close_diff
-        + next_5_close_diff
-    ) / 5
+    next_close_slope = df["close"].shift(-1) - df["close"]
 
-    prev_close_slope = df["close"].diff()
-    df["prev_close_slope_angle"] = prev_close_slope.apply(math.atan) * (180 / math.pi)
-
-    # detemine whether the next 4 candles are up or down based on current close price. 1 for up, 0 for down
-    df["next_1_close_up"] = next_1_close_diff.apply(lambda x: 1 if x > 0 else 0)
-    df["next_2_close_up"] = next_2_close_diff.apply(lambda x: 1 if x > 0 else 0)
-    df["next_3_close_up"] = next_3_close_diff.apply(lambda x: 1 if x > 0 else 0)
-    df["next_4_close_up"] = next_4_close_diff.apply(lambda x: 1 if x > 0 else 0)
+    # slope of the next candle
+    df["next_close_slope_angle"] = next_close_slope.apply(math.atan) * (180 / math.pi)
 
     # filter prices that do not change
     df["changes"] = df["close"].diff() / 0

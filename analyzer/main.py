@@ -27,8 +27,8 @@ COLUMNS_TO_KEEP = [
     "stoch_5_5_d_slope_angle",
     "stoch_10_10_k_slope_angle",
     "stoch_10_10_d_slope_angle",
-    "di_plus_slope_angle",
-    "di_minus_slope_angle",
+    # "di_plus_slope_angle",
+    # "di_minus_slope_angle",
 ]
 
 
@@ -60,19 +60,19 @@ def train():
     # d = dtale.show(df_5m, subprocess=False, host="localhost")
     # d.open_browser()
 
-    columns = COLUMNS_TO_KEEP + ["prev_close_slope_angle"]
+    columns = COLUMNS_TO_KEEP + ["next_close_slope_angle"]
 
     data_5m = df_5m[columns]
     print(data_5m.head(15))
 
     # remove target outliers
-    Q1 = data_5m["prev_close_slope_angle"].quantile(0.25)
-    Q3 = data_5m["prev_close_slope_angle"].quantile(0.75)
+    Q1 = data_5m["next_close_slope_angle"].quantile(0.25)
+    Q3 = data_5m["next_close_slope_angle"].quantile(0.75)
     IQR = Q3 - Q1
     data_5m = data_5m[
         ~(
-            (data_5m["prev_close_slope_angle"] < (Q1 - 1.5 * IQR))
-            | (data_5m["prev_close_slope_angle"] > (Q3 + 1.5 * IQR))
+            (data_5m["next_close_slope_angle"] < (Q1 - 1.5 * IQR))
+            | (data_5m["next_close_slope_angle"] > (Q3 + 1.5 * IQR))
         )
     ]
 
@@ -80,8 +80,8 @@ def train():
 
     data_5m = candles.remove_outliers(data_5m, columns)
 
-    target = data_5m["prev_close_slope_angle"]
-    data_5m.drop("prev_close_slope_angle", axis=1, inplace=True)
+    target = data_5m["next_close_slope_angle"]
+    data_5m.drop("next_close_slope_angle", axis=1, inplace=True)
 
     [data_5m, data_5m_scaler] = scaler.scale(data_5m)
 
@@ -139,7 +139,6 @@ def simulate():
     columns = COLUMNS_TO_KEEP + ["close", "next_close"]
 
     data_5m = df_5m[columns]
-    print(data_5m.head(15))
 
     data_5m = candles.remove_outliers(data_5m, columns)
 
@@ -152,23 +151,38 @@ def simulate():
     data_5m.dropna(inplace=True)
 
     predictions = model.predict(data_5m[COLUMNS_TO_KEEP])
+    print(predictions)
 
-    # get the exact prediction based on multi-class classification
+    # get the index of the max value
     predictions = predictions.argmax(axis=1)
 
     data_5m["prediction"] = predictions.round().astype(int)
+
+    print(data_5m.head(15))
     
     # iterate through the predictions and make trades
     trades = []
+    winings = 0
+    losings = 0
     for index, row in data_5m.iterrows():
-        if row["prediction"] > 4:
+        if row["prediction"] > 6:
             t = Trade(env.SYMBOL, 1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
             trades.append(t)
-            print(f"Buy at {row['close']} at {index}: {t.profit}")
-        elif row["prediction"] < 4:
+            if (t.profit > 0):
+                winings += 1
+            else:
+                losings += 1
+            print(f"\rWin/Loss: {winings}/{losings}", end="")
+        elif row["prediction"] < 2:
             t = Trade(env.SYMBOL, -1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
             trades.append(t)
-            print(f"Sell at {row['close']} at {index}: {t.profit}")
+            if (t.profit > 0):
+                winings += 1
+            else:
+                losings += 1
+            print(f"\rWin/Loss: {winings}/{losings}", end="")
+            
+    print("\n")
             
     # calculate profits from all trades with self.profit using for loop
     profits = sum([t.profit for t in trades])

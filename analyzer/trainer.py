@@ -13,7 +13,7 @@ from tensorflow.keras.utils import to_categorical
 def train(df):
     print("Splitting data into train and test")
     # split data into train and test
-    train, test = train_test_split(df, test_size=0.2, shuffle=False)
+    train, test = train_test_split(df, test_size=0.2, shuffle=True)
 
     # split data into X and y
     X_train = train.drop(["target"], axis=1)
@@ -25,6 +25,8 @@ def train(df):
 
     [y_pred, history, model] = train_nn(X_train, y_train, X_test)
     predictions = y_pred.round()
+    print(y_pred.shape)
+    print(y_test.shape)
 
     # calculate rmse
     accuracy = accuracy_score(y_test, predictions)
@@ -43,7 +45,7 @@ def train_nn(X_train, y_train, X_test):
     model.add(Dense(32, activation="relu"))
     model.add(Dense(9, activation="softmax"))
     model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
-    history = model.fit(X_train, y_train, epochs=30, batch_size=64, verbose=1)
+    history = model.fit(X_train, y_train, epochs=15, batch_size=64, verbose=1)
     y_pred = model.predict(X_test)
     return [y_pred, history, model]
 
