@@ -8,7 +8,6 @@ import uuid
 import datetime
 import joblib
 
-
 # get candles and plot
 def main():
     # generate new uuid

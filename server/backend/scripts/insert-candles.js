@@ -11,6 +11,11 @@ if (!Configuration.data.candles) {
   process.exit();
 }
 
+if (!Configuration.data.symbol) {
+  console.log('Symbol not specified');
+  process.exit();
+}
+
 // check whether the file exists
 if (!fs.existsSync(Configuration.data.candles)) {
   console.log('File does not exist');
@@ -18,11 +23,10 @@ if (!fs.existsSync(Configuration.data.candles)) {
 }
 
 /**
- *
  * @param {any[]} data
  */
 const onEnoughData = async data => {
-  const symbol = 'GBPUSD';
+  const symbol = Configuration.data.symbol;
 
   /**
    * @type {import('@/src/core/db/candles/insert').Candle[]}
