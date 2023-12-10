@@ -4,10 +4,18 @@ import scaler
 import trainer
 import dtale
 from sklearn.preprocessing import MinMaxScaler
+import uuid
+import datetime
+import joblib
 
 
 # get candles and plot
 def main():
+    # generate new uuid
+    program_id = uuid.uuid4()
+
+    print("Program ID: " + str(program_id))
+
     start_time = "00:00:00"
     end_time = "22:00:00"
 
@@ -56,33 +64,31 @@ def main():
 
     target = data_5m["target"]
     data_5m = data_5m.drop(["target"], axis=1)
-    data_5m = scaler.scale(data_5m)
+    [data_5m, data_5m_scaler] = scaler.scale(data_5m)
     data_5m["target"] = scaler.scale_target(target)
     print(data_5m[['target']].head(15))
 
     data_5m.dropna(inplace=True)
 
 
-    d = dtale.show(data_5m, subprocess=False, host="localhost")
+    # d = dtale.show(data_5m, subprocess=False, host="localhost")
     # d.open_browser()
 
-    result = trainer.train(data_5m)
+    model = trainer.train(data_5m)
+    
+    # Get the current date and time
+    now = datetime.datetime.now()
 
-    # df_15m = scaler.scale(candles.resample_df(df_5m, '15min'))
-    # df_30m = scaler.scale(candles.resample_df(df_5m, '30min'))
-    # df_1h = scaler.scale(candles.resample_df(df_5m, '1h'))
-    # df_2h = scaler.scale(candles.resample_df(df_5m, '2h'))
-    # df_4h = scaler.scale(candles.resample_df(df_5m, '4h'))
-    # df_1d = scaler.scale(candles.resample_df(df_5m, '1d'))
+    # Format the current date and time as a string in the format 'YYYYMMDD_HHMMSS'
+    # For example: '20230401_153045'
+    formatted_now = now.strftime('%Y%m%d_%H%M%S')
 
-    # print(df_5m.head(15))
-    # print(df_15m.head(15))
-    # print(df_30m.head(15))
-    # print(df_1h.head(15))
-    # print(df_2h.head(15))
-    # print(df_4h.head(15))
-    # print(df_1d.head(15))
+    model_name = f"models/{formatted_now}_{str(program_id)}_model.keras"
+    model.save(model_name)
 
+    # save the scaler
+    scaler_name = f"models/{formatted_now}_{str(program_id)}_scaler.pkl"
+    joblib.dump(data_5m_scaler, scaler_name)
 
 if __name__ == "__main__":
     main()

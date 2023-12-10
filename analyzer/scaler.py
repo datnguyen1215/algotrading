@@ -14,7 +14,7 @@ def scale(df):
     # use time as index
     df_scaled.index = index
 
-    return df_scaled
+    return [df_scaled, scaler]
 
 def scale_target(target):
     negative_target = target

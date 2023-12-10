@@ -31,9 +31,10 @@ def train(df):
     print("Accuracy: %.2f%%" % (accuracy * 100.0))
 
     # plot loss during training and accuracy
-    plt.plot(history.history["accuracy"], label="accuracy")
-    plt.legend()
-    plt.show()
+    # plt.plot(history.history["accuracy"], label="accuracy")
+    # plt.legend()
+    # plt.show()
+    return model
 
 
 def train_nn(X_train, y_train, X_test):
