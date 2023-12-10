@@ -3,13 +3,13 @@ import candles
 import scaler
 import trainer
 import dtale
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
 
 # get candles and plot
 def main():
     start_time = "00:00:00"
-    end_time = "17:00:00"
+    end_time = "22:00:00"
 
     print("Fetching candles...")
     df_5m = candles.get()
@@ -48,21 +48,6 @@ def main():
         "stoch_10_10_d_slope_angle",
         "di_plus_slope_angle",
         "di_minus_slope_angle",
-        # "avg_ema_3_5_diff",
-        # "avg_ema_3_8_diff",
-        # "avg_ema_3_13_diff",
-        # "avg_ema_3_21_diff",
-        # "avg_ema_5_8_diff",
-        # "avg_ema_5_13_diff",
-        # "avg_ema_5_21_diff",
-        # "avg_ema_8_13_diff",
-        # "avg_ema_8_21_diff",
-        # "avg_ema_13_21_diff",
-        # "ema_3_price_diff",
-        # "ema_5_price_diff",
-        # "ema_8_price_diff",
-        # "ema_13_price_diff",
-        # "ema_21_price_diff",
         "target"
     ]
 
@@ -72,14 +57,15 @@ def main():
     target = data_5m["target"]
     data_5m = data_5m.drop(["target"], axis=1)
     data_5m = scaler.scale(data_5m)
-    data_5m["target"] = target
+    data_5m["target"] = scaler.scale_target(target)
+    print(data_5m[['target']].head(15))
 
     data_5m.dropna(inplace=True)
 
-    # d = dtale.show(data_5m, subprocess=False, host="localhost")
+
+    d = dtale.show(data_5m, subprocess=False, host="localhost")
     # d.open_browser()
 
-    print(data_5m.head(15))
     result = trainer.train(data_5m)
 
     # df_15m = scaler.scale(candles.resample_df(df_5m, '15min'))

@@ -23,7 +23,7 @@ def train(df):
     y_train = to_categorical(y_train)
     y_test = to_categorical(y_test)
 
-    [y_pred, history] = train_nn(X_train, y_train, X_test)
+    [y_pred, history, model] = train_nn(X_train, y_train, X_test)
     predictions = y_pred.round()
 
     # calculate rmse
@@ -44,7 +44,7 @@ def train_nn(X_train, y_train, X_test):
     model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
     history = model.fit(X_train, y_train, epochs=30, batch_size=64, verbose=1)
     y_pred = model.predict(X_test)
-    return [y_pred, history]
+    return [y_pred, history, model]
 
 
 def train_xgb(X_train, y_train, X_test):

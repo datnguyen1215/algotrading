@@ -7,10 +7,9 @@ import ta
 import math
 from sklearn.preprocessing import MinMaxScaler
 
-
 # get candles from http://localhost:3005/api/candles
 def get():
-    url = "http://localhost:3005/api/candles?limit=99999999"
+    url = "http://localhost:3005/api/candles?limit=5000&symbol=GBPUSD"
     r = requests.get(url)
     candles = r.json()
     return candles_to_df(candles)
@@ -266,17 +265,9 @@ def add_indicators(df):
     IQR = Q3 - Q1
     df = df[~((df["target"] < (Q1 - 1.5 * IQR)) | (df["target"] > (Q3 + 1.5 * IQR)))]
 
-    # scale it again to -4 to 4
-    scaler_target = MinMaxScaler(feature_range=(0, 8))
-    df["target"] = scaler_target.fit_transform(df["target"].values.reshape(-1, 1))
-
     df.dropna(inplace=True)
-    df["target"] = df["target"].round().astype(int)
-
-    print(df["target"].value_counts())
 
     return df
-
 
 # remove outliers for multiple columns
 def remove_outliers(df, columns):
