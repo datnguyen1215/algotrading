@@ -32,16 +32,18 @@ def scale_target(target):
     negative_target[negative_target > 0] = 0
 
     # scale to be between -4 and 0
-    scaler = MinMaxScaler(feature_range=(-4, 0))
+    scaler = MinMaxScaler(feature_range=(0, 0.5))
     negative_target = scaler.fit_transform(negative_target.values.reshape(-1, 1))
 
     positive_target = target.copy()
     positive_target[positive_target < 0] = 0
 
     # scale to be between 0 and 4
-    scaler = MinMaxScaler(feature_range=(0, 4))
+    scaler = MinMaxScaler(feature_range=(0.5, 1))
     positive_target = scaler.fit_transform(positive_target.values.reshape(-1, 1))
+    target[target > 0] = positive_target
+    target[target < 0] = negative_target
 
-    target = negative_target + positive_target
+    # target = negative_target + positive_target
 
     return target

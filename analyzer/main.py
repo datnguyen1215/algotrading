@@ -10,25 +10,56 @@ import joblib
 import env
 import os
 from simulation.trade import Trade
-from tensorflow.keras.models import load_model
 
 COLUMNS_TO_KEEP = [
     "avg_ema_3_slope_angle",
+    # "avg_ema_3_slope_angle_2",
+    # "avg_ema_3_slope_angle_3",
     "avg_ema_5_slope_angle",
+    # "avg_ema_5_slope_angle_2",
+    # "avg_ema_5_slope_angle_3",
     "rsi_7_slope_angle",
+    # "rsi_7_slope_angle_2",
+    # "rsi_7_slope_angle_3",
     "rsi_7_sma_slope_angle",
+    # "rsi_7_sma_slope_angle_2",
+    # "rsi_7_sma_slope_angle_3",
     "rsi_14_slope_angle",
+    # "rsi_14_slope_angle_2",
+    # "rsi_14_slope_angle_3",
     "rsi_14_sma_slope_angle",
+    # "rsi_14_sma_slope_angle_2",
+    # "rsi_14_sma_slope_angle_3",
     "macd_6_13_slope_angle",
+    # "macd_6_13_slope_angle_2",
+    # "macd_6_13_slope_angle_3",
     "macd_6_13_ema_slope_angle",
+    # "macd_6_13_ema_slope_angle_2",
+    # "macd_6_13_ema_slope_angle_3",
     "macd_12_26_slope_angle",
+    # "macd_12_26_slope_angle_2",
+    # "macd_12_26_slope_angle_3",
     "macd_12_26_ema_slope_angle",
+    # "macd_12_26_ema_slope_angle_2",
+    # "macd_12_26_ema_slope_angle_3",
     "stoch_5_5_k_slope_angle",
+    # "stoch_5_5_k_slope_angle_2",
+    # "stoch_5_5_k_slope_angle_3",
     "stoch_5_5_d_slope_angle",
+    # "stoch_5_5_d_slope_angle_2",
+    # "stoch_5_5_d_slope_angle_3",
     "stoch_10_10_k_slope_angle",
+    # "stoch_10_10_k_slope_angle_2",
+    # "stoch_10_10_k_slope_angle_3",
     "stoch_10_10_d_slope_angle",
-    # "di_plus_slope_angle",
-    # "di_minus_slope_angle",
+    # "stoch_10_10_d_slope_angle_2",
+    # "stoch_10_10_d_slope_angle_3",
+    "di_plus_slope_angle",
+    # "di_plus_slope_angle_2",
+    # "di_plus_slope_angle_3",
+    "di_minus_slope_angle",
+    # "di_minus_slope_angle_2",
+    # "di_minus_slope_angle_3",
 ]
 
 
@@ -63,7 +94,6 @@ def train():
     columns = COLUMNS_TO_KEEP + ["next_close_slope_angle"]
 
     data_5m = df_5m[columns]
-    print(data_5m.head(15))
 
     # remove target outliers
     Q1 = data_5m["next_close_slope_angle"].quantile(0.25)
@@ -90,12 +120,6 @@ def train():
     # need to drop NaNs after scaling, otherwise, it'll contain NaNs for some reasons.
     data_5m.dropna(inplace=True)
 
-    # need to +4 to map it from 0 to 8. Otherwise, we'll have problems with
-    # classifier.
-    data_5m["target"] = data_5m["target"].round().astype(int) + 4
-
-    print(data_5m.head(15))
-
     # d = dtale.show(data_5m, subprocess=False, host="localhost")
     # d.open_browser()
 
@@ -112,23 +136,22 @@ def train():
     if not os.path.exists("models"):
         os.makedirs("models")
 
-    model_name = f"models/{formatted_now}_{str(program_id)}_model.keras"
-    model.save(model_name)
+    model_name = f"models/{formatted_now}_{str(program_id)}_m"
+    joblib.dump(model, model_name)
 
     # save the scaler
-    scaler_name = f"models/{formatted_now}_{str(program_id)}_scaler.pkl"
+    scaler_name = f"models/{formatted_now}_{str(program_id)}_s"
     joblib.dump(data_5m_scaler, scaler_name)
 
 
 def simulate():
     print("Loading model and scaler...")
-    model = load_model(env.MODEL_PATH)
+    model = joblib.load(env.MODEL_PATH)
     model_feature_scaler = joblib.load(env.SCALER_PATH)
     print("Done loading model and scaler")
 
     print("Getting candles...")
     df_5m = candles.get(env.SYMBOL, env.N_CANDLES)
-    print(df_5m.head(15))
 
     # should be used for calculating profit
     df_5m["next_close"] = df_5m["close"].shift(-1)
@@ -151,12 +174,9 @@ def simulate():
     data_5m.dropna(inplace=True)
 
     predictions = model.predict(data_5m[COLUMNS_TO_KEEP])
-    print(predictions)
-
-    # get the index of the max value
-    predictions = predictions.argmax(axis=1)
-
-    data_5m["prediction"] = predictions.round().astype(int)
+    data_5m["prediction"] = predictions
+    
+    # dtale.show(data_5m, subprocess=False, host="localhost").open_browser()
 
     print(data_5m.head(15))
     
@@ -165,7 +185,7 @@ def simulate():
     winings = 0
     losings = 0
     for index, row in data_5m.iterrows():
-        if row["prediction"] > 6:
+        if row["prediction"] > 0.5:
             t = Trade(env.SYMBOL, 1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
             trades.append(t)
             if (t.profit > 0):
@@ -173,7 +193,7 @@ def simulate():
             else:
                 losings += 1
             print(f"\rWin/Loss: {winings}/{losings}", end="")
-        elif row["prediction"] < 2:
+        elif row["prediction"] < 0.5:
             t = Trade(env.SYMBOL, -1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
             trades.append(t)
             if (t.profit > 0):
