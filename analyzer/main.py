@@ -64,8 +64,8 @@ COLUMNS_TO_KEEP = [
 
 
 def filter_candles(df):
-    start_time = "00:00:00"
-    end_time = "22:00:00"
+    start_time = "08:00:00"
+    end_time = "17:00:00"
 
     print("Filtering candles from " + start_time + " to " + end_time)
     df = df.between_time(start_time, end_time)
@@ -181,26 +181,20 @@ def simulate():
     print(data_5m.head(15))
     
     # iterate through the predictions and make trades
+    balance = 100000
     trades = []
-    winings = 0
-    losings = 0
     for index, row in data_5m.iterrows():
-        if row["prediction"] > 0.5:
-            t = Trade(env.SYMBOL, 1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
+        size = balance * 0.05
+        if row["prediction"] > 0.7:
+            t = Trade(env.SYMBOL, size, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
             trades.append(t)
-            if (t.profit > 0):
-                winings += 1
-            else:
-                losings += 1
-            print(f"\rWin/Loss: {winings}/{losings}", end="")
-        elif row["prediction"] < 0.5:
-            t = Trade(env.SYMBOL, -1, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
+            balance += t.profit
+            print(f"\rBalance: {balance}", end="")
+        elif row["prediction"] < 0.3:
+            t = Trade(env.SYMBOL, -size, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
             trades.append(t)
-            if (t.profit > 0):
-                winings += 1
-            else:
-                losings += 1
-            print(f"\rWin/Loss: {winings}/{losings}", end="")
+            balance += t.profit
+            print(f"\rBalance: {balance}", end="")
             
     print("\n")
             
