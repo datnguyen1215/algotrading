@@ -14,7 +14,7 @@ class Trade:
         self.close_time = close_time
         self.profit = 0
         
-        if (self.close_time is not None):
+        if (self.close_price is not None):
             self.profit = self.size * (self.close_price - self.price)
         pass
 

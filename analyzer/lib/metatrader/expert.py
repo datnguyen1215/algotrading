@@ -22,6 +22,10 @@ def receive_message(connection):
 class Expert:
     def __init__(self, connection) -> None:
         self.connection = connection
+        
+        # chart_info = self.get_chart_info()
+        # self.symbol = chart_info["symbol"]
+        # self.timeframe = chart_info["timeframe"]
         pass
 
     def get_candles(self, symbol, timeframe="M5", n_candles=500):
@@ -33,6 +37,33 @@ class Expert:
         payload = {
             "type": "LAST_CANDLES",
             "n_candles": n_candles,
+            "timeframe": timeframe,
+            "symbol": symbol,
+        }
+
+        msg = {"id": msg_id, "type": "REQUEST", "payload": payload}
+        msg_bytes = (json.dumps(msg) + "\x03").encode("utf-8")
+
+        self.connection.send(msg_bytes)
+
+        # receive message
+        while True:
+            data = receive_message(self.connection)
+
+            if data["id"] != msg_id and data["type"] != "RESPONSE":
+                continue
+
+            payload = data["payload"]
+            return payload
+
+    def get_chart_info(self):
+        if self.connection is None:
+            raise Exception("Connection not set")
+
+        msg_id = str(uuid.uuid4())
+
+        payload = {
+            "type": "CHART_INFO",
         }
 
         msg = {"id": msg_id, "type": "REQUEST", "payload": payload}

@@ -2,10 +2,10 @@
 
 from metatrader.server import start_server, accept_client
 from metatrader.expert import Expert
-import candles
+import lib.candles as candles
 import pandas as pd
 import time
-import scaler
+import lib.scaler as scaler
 import joblib
 import env
 import schedule
@@ -89,14 +89,12 @@ if __name__ == "__main__":
 
         df = candles.add_indicators(df)
         df = df[COLUMNS_TO_KEEP]
-        print(df.tail(1))
         df.dropna(inplace=True)
 
         [df, data_5m_scaler] = scaler.scale(df, model_feature_scaler)
 
         # get the last data
         last_data = df[-3:]
-        print(last_data)
         predictions = model.predict(last_data)
 
         if predictions[-2] > 0.5:

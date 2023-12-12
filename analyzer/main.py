@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-import candles
-import scaler
-import trainer
+import lib.candles as candles
+import lib.scaler as scaler
+import lib.trainer as trainer
 import dtale
 from sklearn.preprocessing import MinMaxScaler
 import uuid
@@ -10,62 +10,11 @@ import joblib
 import env
 import os
 from simulation.trade import Trade
-
-COLUMNS_TO_KEEP = [
-    "avg_ema_3_slope_angle",
-    # "avg_ema_3_slope_angle_2",
-    # "avg_ema_3_slope_angle_3",
-    "avg_ema_5_slope_angle",
-    # "avg_ema_5_slope_angle_2",
-    # "avg_ema_5_slope_angle_3",
-    "rsi_7_slope_angle",
-    # "rsi_7_slope_angle_2",
-    # "rsi_7_slope_angle_3",
-    "rsi_7_sma_slope_angle",
-    # "rsi_7_sma_slope_angle_2",
-    # "rsi_7_sma_slope_angle_3",
-    "rsi_14_slope_angle",
-    # "rsi_14_slope_angle_2",
-    # "rsi_14_slope_angle_3",
-    "rsi_14_sma_slope_angle",
-    # "rsi_14_sma_slope_angle_2",
-    # "rsi_14_sma_slope_angle_3",
-    "macd_6_13_slope_angle",
-    # "macd_6_13_slope_angle_2",
-    # "macd_6_13_slope_angle_3",
-    "macd_6_13_ema_slope_angle",
-    # "macd_6_13_ema_slope_angle_2",
-    # "macd_6_13_ema_slope_angle_3",
-    "macd_12_26_slope_angle",
-    # "macd_12_26_slope_angle_2",
-    # "macd_12_26_slope_angle_3",
-    "macd_12_26_ema_slope_angle",
-    # "macd_12_26_ema_slope_angle_2",
-    # "macd_12_26_ema_slope_angle_3",
-    "stoch_5_5_k_slope_angle",
-    # "stoch_5_5_k_slope_angle_2",
-    # "stoch_5_5_k_slope_angle_3",
-    "stoch_5_5_d_slope_angle",
-    # "stoch_5_5_d_slope_angle_2",
-    # "stoch_5_5_d_slope_angle_3",
-    "stoch_10_10_k_slope_angle",
-    # "stoch_10_10_k_slope_angle_2",
-    # "stoch_10_10_k_slope_angle_3",
-    "stoch_10_10_d_slope_angle",
-    # "stoch_10_10_d_slope_angle_2",
-    # "stoch_10_10_d_slope_angle_3",
-    "di_plus_slope_angle",
-    # "di_plus_slope_angle_2",
-    # "di_plus_slope_angle_3",
-    "di_minus_slope_angle",
-    # "di_minus_slope_angle_2",
-    # "di_minus_slope_angle_3",
-]
-
+import lib.features as features
 
 def filter_candles(df):
-    start_time = "08:00:00"
-    end_time = "17:00:00"
+    start_time = "00:00:00"
+    end_time = "22:00:00"
 
     print("Filtering candles from " + start_time + " to " + end_time)
     df = df.between_time(start_time, end_time)
@@ -79,69 +28,7 @@ def filter_candles(df):
     return df
 
 
-def train():
-    # generate new uuid
-    program_id = uuid.uuid4()
-
-    print("Program ID: " + str(program_id))
-
-    df_5m = candles.get(env.SYMBOL, env.N_CANDLES)
-    df_5m = filter_candles(df_5m)
-
-    # d = dtale.show(df_5m, subprocess=False, host="localhost")
-    # d.open_browser()
-
-    columns = COLUMNS_TO_KEEP + ["next_close_slope_angle"]
-
-    data_5m = df_5m[columns]
-
-    # remove target outliers
-    Q1 = data_5m["next_close_slope_angle"].quantile(0.25)
-    Q3 = data_5m["next_close_slope_angle"].quantile(0.75)
-    IQR = Q3 - Q1
-    data_5m = data_5m[
-        ~(
-            (data_5m["next_close_slope_angle"] < (Q1 - 1.5 * IQR))
-            | (data_5m["next_close_slope_angle"] > (Q3 + 1.5 * IQR))
-        )
-    ]
-
-    data_5m.dropna(inplace=True)
-
-    data_5m = candles.remove_outliers(data_5m, columns)
-
-    target = data_5m["next_close_slope_angle"]
-    data_5m.drop("next_close_slope_angle", axis=1, inplace=True)
-
-    [data_5m, data_5m_scaler] = scaler.scale(data_5m)
-
-    data_5m["target"] = scaler.scale_target(target)
-
-    # need to drop NaNs after scaling, otherwise, it'll contain NaNs for some reasons.
-    data_5m.dropna(inplace=True)
-
-    # d = dtale.show(data_5m, subprocess=False, host="localhost")
-    # d.open_browser()
-
-    model = trainer.train(data_5m)
-
-    # Get the current date and time
-    now = datetime.datetime.now()
-
-    # Format the current date and time as a string in the format 'YYYYMMDD_HHMMSS'
-    # For example: '20230401_153045'
-    formatted_now = now.strftime("%Y%m%d_%H%M%S")
-
-    # check if models directory exists
-    if not os.path.exists("models"):
-        os.makedirs("models")
-
-    model_name = f"models/{formatted_now}_{str(program_id)}_m"
-    joblib.dump(model, model_name)
-
-    # save the scaler
-    scaler_name = f"models/{formatted_now}_{str(program_id)}_s"
-    joblib.dump(data_5m_scaler, scaler_name)
+def start_training():
 
 
 def simulate():
@@ -159,7 +46,7 @@ def simulate():
     df_5m = filter_candles(df_5m)
     print("Done getting candles")
 
-    columns = COLUMNS_TO_KEEP + ["close", "next_close"]
+    columns = features.NAMES + ["close", "next_close"]
 
     data_5m = df_5m[columns]
 
@@ -173,31 +60,45 @@ def simulate():
 
     data_5m.dropna(inplace=True)
 
-    predictions = model.predict(data_5m[COLUMNS_TO_KEEP])
+    predictions = model.predict(data_5m[features.NAMES])
     data_5m["prediction"] = predictions
-    
+
     # dtale.show(data_5m, subprocess=False, host="localhost").open_browser()
 
     print(data_5m.head(15))
-    
+
     # iterate through the predictions and make trades
     balance = 100000
     trades = []
     for index, row in data_5m.iterrows():
         size = balance * 0.05
         if row["prediction"] > 0.7:
-            t = Trade(env.SYMBOL, size, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
+            t = Trade(
+                env.SYMBOL,
+                size,
+                row["close"],
+                index,
+                row["next_close"],
+                index + datetime.timedelta(minutes=5),
+            )
             trades.append(t)
             balance += t.profit
             print(f"\rBalance: {balance}", end="")
         elif row["prediction"] < 0.3:
-            t = Trade(env.SYMBOL, -size, row["close"], index, row["next_close"], index + datetime.timedelta(minutes=5))
+            t = Trade(
+                env.SYMBOL,
+                -size,
+                row["close"],
+                index,
+                row["next_close"],
+                index + datetime.timedelta(minutes=5),
+            )
             trades.append(t)
             balance += t.profit
             print(f"\rBalance: {balance}", end="")
-            
+
     print("\n")
-            
+
     # calculate profits from all trades with self.profit using for loop
     profits = sum([t.profit for t in trades])
     print("Profits: " + str(profits))
@@ -211,6 +112,7 @@ def simulate():
     # calcculate win percentage
     win_percentage = len(winning_trades) / len(trades) * 100
     print(f"Win percentage: {win_percentage}%")
+
 
 # get candles and plot
 def main():

@@ -23,7 +23,6 @@ def candles_to_df(candles):
     df["time"] = pd.to_datetime(df["time"])
     df.set_index("time", inplace=True)
     df.drop(["symbol"], axis=1, inplace=True)
-    df = add_indicators(df)
     return df
 
 
@@ -33,11 +32,7 @@ def get_angles(series, delta_x=5):
     return np.degrees(np.arctan(slopes))
 
 
-def add_indicators(df):
-    # 5 minutes data
-    # TODO: Need to change this to other minutes data
-    delta_x = 5
-
+def add_indicators(df, delta_x=5):
     # include rsi 7 and sma of the rsi 7
     rsi_7 = ta.momentum.rsi(df["close"], window=7)
     rsi_7_sma = ta.trend.sma_indicator(rsi_7, window=7)
@@ -47,7 +42,7 @@ def add_indicators(df):
 
     df["rsi_7_slope_angle_2"] = df["rsi_7_slope_angle"].shift()
     df["rsi_7_sma_slope_angle_2"] = df["rsi_7_slope_angle"].shift()
-    
+
     df["rsi_7_slope_angle_3"] = df["rsi_7_slope_angle"].shift(2)
     df["rsi_7_sma_slope_angle_3"] = df["rsi_7_slope_angle"].shift(2)
 
@@ -57,7 +52,7 @@ def add_indicators(df):
 
     df["rsi_14_slope_angle"] = get_angles(rsi_14, delta_x)
     df["rsi_14_sma_slope_angle"] = get_angles(rsi_14_sma, delta_x)
-    
+
     df["rsi_14_slope_angle_2"] = df["rsi_14_slope_angle"].shift()
     df["rsi_14_sma_slope_angle_2"] = df["rsi_14_slope_angle"].shift()
 
@@ -81,7 +76,7 @@ def add_indicators(df):
     df["avg_ema_8_slope_angle"] = get_angles(ema_8, delta_x)
     df["avg_ema_13_slope_angle"] = get_angles(ema_13, delta_x)
     df["avg_ema_21_slope_angle"] = get_angles(ema_21, delta_x)
-    
+
     df["avg_ema_3_slope_angle_2"] = df["avg_ema_3_slope_angle"].shift()
     df["avg_ema_5_slope_angle_2"] = df["avg_ema_5_slope_angle"].shift()
     df["avg_ema_8_slope_angle_2"] = df["avg_ema_8_slope_angle"].shift()
@@ -102,7 +97,7 @@ def add_indicators(df):
 
     df["macd_6_13_slope_angle"] = get_angles(macd_6_13, delta_x)
     df["macd_6_13_ema_slope_angle"] = get_angles(macd_6_13_ema, delta_x)
-    
+
     df["macd_6_13_slope_angle_2"] = df["macd_6_13_slope_angle"].shift()
     df["macd_6_13_ema_slope_angle_2"] = df["macd_6_13_ema_slope_angle"].shift()
 
@@ -117,7 +112,7 @@ def add_indicators(df):
 
     df["macd_12_26_slope_angle"] = get_angles(macd_12_26, delta_x)
     df["macd_12_26_ema_slope_angle"] = get_angles(macd_12_26_ema, delta_x)
-    
+
     df["macd_12_26_slope_angle_2"] = df["macd_12_26_slope_angle"].shift()
     df["macd_12_26_ema_slope_angle_2"] = df["macd_12_26_ema_slope_angle"].shift()
 
@@ -132,7 +127,7 @@ def add_indicators(df):
 
     df["stoch_5_5_k_slope_angle"] = get_angles(stoch_5_5_k, delta_x)
     df["stoch_5_5_d_slope_angle"] = get_angles(stoch_5_5_d, delta_x)
-    
+
     df["stoch_5_5_k_slope_angle_2"] = df["stoch_5_5_k_slope_angle"].shift()
     df["stoch_5_5_d_slope_angle_2"] = df["stoch_5_5_d_slope_angle"].shift()
 
@@ -147,7 +142,7 @@ def add_indicators(df):
 
     df["stoch_10_10_k_slope_angle"] = get_angles(stoch_10_10_k, delta_x)
     df["stoch_10_10_d_slope_angle"] = get_angles(stoch_10_10_d, delta_x)
-    
+
     df["stoch_10_10_k_slope_angle_2"] = df["stoch_10_10_k_slope_angle"].shift()
     df["stoch_10_10_d_slope_angle_2"] = df["stoch_10_10_d_slope_angle"].shift()
 
@@ -164,27 +159,31 @@ def add_indicators(df):
 
     df["di_plus_slope_angle"] = get_angles(di_plus, delta_x)
     df["di_minus_slope_angle"] = get_angles(di_minus, delta_x)
-    
+
     df["di_plus_slope_angle_2"] = df["di_plus_slope_angle"].shift()
     df["di_minus_slope_angle_2"] = df["di_minus_slope_angle"].shift()
 
     df["di_plus_slope_angle_3"] = df["di_plus_slope_angle"].shift(2)
     df["di_minus_slope_angle_3"] = df["di_minus_slope_angle"].shift(2)
 
-    # include slope of the close
-    df["next_close"] = df["close"].shift(-1)
-    df['next_close_diff'] = df["next_close"] - df["close"]
-    df['next_close_slope'] = df['next_close_diff'] / delta_x
-
     # slope of the next candle
-    df["next_close_slope_angle"] = get_angles(df['close'], delta_x)
+    df["next_close_slope_angle"] = get_angles(df["close"], delta_x)
+    df["next_high_slope_angle"] = get_angles(df["high"], delta_x)
+    df["next_low_slope_angle"] = get_angles(df["low"], delta_x)
 
     # filter prices that do not change
-    df["changes"] = df["close"].diff() / 0
+    close_changes = df["close"].shift(-1) - df["close"]
+    high_changes = df["high"].shift(-1) - df["high"]
+    low_changes = df["low"].shift(-1) - df["low"]
+
+    df[(close_changes == 0) & (high_changes == 0) & (low_changes == 0)] = np.nan
+    
+    # use this for running simulation
+    df['next_close'] = df['close'].shift(-1)
+    df['next_high'] = df['high'].shift(-1)
+    df['next_low'] = df['low'].shift(-1)
 
     df.dropna(inplace=True)
-
-    print(df[['close', 'next_close', 'next_close_diff', 'next_close_slope', 'next_close_slope_angle']].head())
 
     return df
 
@@ -203,7 +202,6 @@ def resample_df(df, timeframe):
     new_df = df.resample(timeframe).agg(
         {"open": "first", "high": "max", "low": "min", "close": "last"}
     )
-    new_df = add_indicators(new_df)
     return new_df
 
 
