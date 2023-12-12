@@ -3,16 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def scale(df, scaler=None, excluded_columns=[]):
-    # save the exclude
-    tmp = df[excluded_columns]
-
-    # drop it from the current data frame
-    df = df.drop(excluded_columns, axis=1)
-
-    # save the time column for later use
-    index = df.index
-
+def scale(df, scaler=None):
     # scale the data
     if scaler is None:
         scaler = MinMaxScaler()
@@ -20,12 +11,6 @@ def scale(df, scaler=None, excluded_columns=[]):
     df_scaled = scaler.fit_transform(df[df.columns.array])
     df_scaled = pd.DataFrame(df_scaled, columns=df.columns)
 
-    # use time as index
-    df_scaled.index = index
-
-    # add the excluded columns back
-    df_scaled[excluded_columns] = tmp
-    
     return [df_scaled, scaler]
 
 

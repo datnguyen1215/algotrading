@@ -9,6 +9,8 @@ from lib.metatrader.server import start_server, accept_client
 import lib.delta as delta
 import math
 import joblib
+import matplotlib.pyplot as plt
+import datetime
 
 
 def main(args):
@@ -85,32 +87,34 @@ def main(args):
     def make_prediction(symbol, timeframe):
         data = expert.get_candles(symbol, timeframe, n_candles)
         df = pd.DataFrame(data)
-        print(df.tail())
 
         # set 'time' as index datetime
         df["time"] = pd.to_datetime(df["time"])
         df = df.set_index("time")
+        df = df.sort_index()
+
+        # remove last candle since it's not complete
+        df = df[:-1]
 
         df = candles.add_indicators(df)
-        df.dropna(inplace=True)
 
         [df_features, df_scaler] = scaler.scale(
             df[features.NAMES], feature_scalers[timeframe]
         )
 
-        # note: last candle isn't completed, so we'll remove it from the dataframe
-        predictions = models[timeframe].predict(df_features[-2:-1])
+        predictions = models[timeframe].predict(df_features[-1:])
         angles = scale_predictions(predictions, timeframe)
 
         # each prediction is an angle of the movement, so we need to convert it to a price
         # we'll use the last close price as a reference
 
         [pred_high_angle, pred_close_angle, pred_low_angle] = angles[0]
-
+        
         # convert angles to price
-        last_close = df["close"].iloc[0]
-        last_high = df["high"].iloc[0]
-        last_low = df["low"].iloc[0]
+        last_data = df.iloc[-1]
+        last_close = last_data["close"]
+        last_high = last_data["high"]
+        last_low = last_data["low"]
 
         # get radians of angle
         pred_high_r = pred_high_angle * (math.pi / 180)
@@ -131,7 +135,7 @@ def main(args):
         pred_close = last_close + pred_close_slope
         pred_low = last_low + pred_low_slope
 
-        return [pred_high, pred_close, pred_low]
+        return [last_close, pred_close]
 
     def scale_predictions(original_preds, timeframe):
         # scale the predictions back to original form
@@ -172,13 +176,35 @@ def main(args):
         return predictions
 
     # go through all timeframes
+    closes = []
+    preds = []
+    timeframes = []
     for timeframe in models:
-        [pred_high, pred_close, pred_low] = make_prediction(symbol, timeframe)
+        [last_close, pred_close] = make_prediction(symbol, timeframe)
+        preds.append(pred_close)
+        closes.append(last_close)
+        timeframes.append(timeframe)
         print(f"Prediction for {timeframe}:")
-        print(f"High: {pred_high}")
-        print(f"Close: {pred_close}")
-        print(f"Low: {pred_low}")
+        print(
+            f"Last Close: {last_close}, Pred: {pred_close}, Change: {pred_close - last_close}"
+        )
         print("")
+
+    # minutes on x-axis
+    now = datetime.datetime.now()
+    x = [now] + [
+        now + datetime.timedelta(minutes=delta.MINUTES[timeframe])
+        for timeframe in timeframes
+    ]
+    x = [x.strftime("%H:%M") for x in x]
+    preds = [p - closes[0] for p in preds]
+    y = [0] + preds
+    print(y)
+    plt.plot(x, y)
+    plt.xlabel("Time")
+    plt.ylabel("Price")
+    plt.title(f"{symbol} Changes over Time")
+    plt.show()
 
 
 if __name__ == "__main__":

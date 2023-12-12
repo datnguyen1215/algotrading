@@ -14,7 +14,7 @@ from tensorflow.keras.optimizers import Adam
 
 def train(df, target_columns=["target"]):
     # split data into train and test
-    train, test = train_test_split(df, test_size=0.5, shuffle=True)
+    train, test = train_test_split(df, test_size=0.2, shuffle=True)
 
     # split data into X and y
     X_train = train.drop(target_columns, axis=1)

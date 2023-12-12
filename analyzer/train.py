@@ -41,6 +41,9 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
 
     df = candles.add_indicators(df, delta_map[timeframe])
 
+    # should drop NaNs after adding indicators, some of them has NaNs
+    df.dropna(inplace=True)
+
     # remove target outliers first so we can scale the target properly
     df = remove_outliers(df, target_columns)
 
@@ -59,8 +62,13 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     [df_targets, neg_target_scaler, pos_target_scaler] = scaler.scale_angle(
         df[target_columns]
     )
-
+    
+    # need to set index back to df. Scaler removes the index for some reasons.
+    df_features.set_index(df.index, inplace=True)
     df[feature_columns] = df_features
+    
+    # need to set index back to df. Scaler removes the index for some reasons.
+    df_targets.set_index(df.index, inplace=True)
     df[target_columns] = df_targets
 
     # need to drop NaNs after scaling, otherwise, it'll contain NaNs for some reasons.
@@ -116,6 +124,8 @@ def main():
     parser.add_argument("--symbol", help="Symbol to train", default="EURUSD")
     parser.add_argument("--n_candles", help="Number of candles to train", default=15000)
     args = parser.parse_args()
+
+    print(f"args.symbol: {args.symbol}, args.n_candles: {args.n_candles}")
 
     df = candles.get(args.symbol, args.n_candles)
 
