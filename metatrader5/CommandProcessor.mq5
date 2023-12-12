@@ -180,7 +180,7 @@ void HandleRequest(string id, CJAVal *payload)
       string timeframe = payload["timeframe"].ToStr();
 
       MqlRates rates[];
-      int n_rates = GetLastCandles(n_candles, rates);
+      int n_rates = GetLastCandles(symbolName, timeframe, n_candles, rates);
       SendResponse(id, &RatesToJSON(rates));
    }
    else
@@ -203,31 +203,27 @@ void SendResponse(string id, CJAVal *payload)
 
 ENUM_TIMEFRAMES TimeframeToPeriod(string timeframe)
 {
-   if (timeframe == "M1")
-      return PERIOD_M1;
-   else if (timeframe == "M5")
+   if (timeframe == "5Min")
       return PERIOD_M5;
-   else if (timeframe == "M15")
+   else if (timeframe == "15Min")
       return PERIOD_M15;
-   else if (timeframe == "M30")
+   else if (timeframe == "30Min")
       return PERIOD_M30;
-   else if (timeframe == "H1")
+   else if (timeframe == "1H")
       return PERIOD_H1;
-   else if (timeframe == "H4")
+   else if (timeframe == "2H")
+      return PERIOD_H2;
+   else if (timeframe == "4H")
       return PERIOD_H4;
-   else if (timeframe == "D1")
-      return PERIOD_D1;
-   else if (timeframe == "W1")
-      return PERIOD_W1;
-   else if (timeframe == "MN1")
-      return PERIOD_MN1;
+   else if (timeframe == "6H")
+      return PERIOD_H6;
    else
       return PERIOD_CURRENT;
 }
 
-int GetLastCandles(int n_candles, MqlRates &rates[])
+int GetLastCandles(string symbol, string timeframe, int n_candles, MqlRates &rates[])
 {
-   int n_rates = CopyRates(Symbol(), PERIOD_CURRENT, 0, n_candles, rates);
+   int n_rates = CopyRates(symbol, TimeframeToPeriod(timeframe), 0, n_candles, rates);
    return n_rates;
 }
 

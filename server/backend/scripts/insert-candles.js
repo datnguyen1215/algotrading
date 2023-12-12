@@ -4,6 +4,7 @@ import fs from 'fs';
 import readline from 'readline';
 import Configuration from '@src/configuration';
 import db from '@/src/core/db';
+import format from 'pg-format';
 
 // check whether file path exists
 if (!Configuration.data.candles) {
@@ -22,56 +23,32 @@ if (!fs.existsSync(Configuration.data.candles)) {
   process.exit();
 }
 
-/**
- * @param {any[]} data
- */
-const onEnoughData = async data => {
-  const symbol = Configuration.data.symbol;
+const insert = async candles => {
+  const data = candles.map(candle => [
+    Configuration.data.symbol,
+    new Date(candle.timestamp).toISOString(),
+    candle.open,
+    candle.high,
+    candle.low,
+    candle.close
+  ]);
 
-  /**
-   * @type {import('@/src/core/db/candles/insert').Candle[]}
-   */
-  const candles = data.map(x => {
-    const [time, open, high, low, close] = x;
-    return {
-      time: new Date(parseInt(time)).toUTCString(),
-      open,
-      high,
-      low,
-      close,
-      symbol
-    };
-  });
+  const query = format(
+    'INSERT INTO candles (symbol, time, open, high, low, close) VALUES %L',
+    data
+  );
 
-  try {
-    await db.candles.insert(candles);
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-let chunks = [];
-
-/**
- * Read a row from the file
- * @param {string} row
- */
-const onRow = async row => {
-  const data = row.split(',');
-  chunks.push(data);
-
-  if (chunks.length !== 500) return;
-
-  await onEnoughData(chunks);
-  chunks = [];
+  await db.query.send(query);
 };
 
 (async () => {
-  const rl = readline.createInterface({
-    input: fs.createReadStream(Configuration.data.candles)
-  });
+  let data = fs.readFileSync(Configuration.data.candles, 'utf8');
+  const candles = JSON.parse(data);
 
-  // must use this syntax to iterate and wait for the insert() to finish
-  // otherwise, we'll have data loss.
-  for await (const line of rl) await onRow(line);
+  // group 500 candles and insert them
+  const group = 500;
+  for (let i = 0; i < candles.length; i += group)
+    await insert(candles.slice(i, i + group));
+
+  process.exit();
 })();
