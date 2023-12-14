@@ -75,8 +75,8 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     df.dropna(inplace=True)
 
     # split data into 20% test and 80% train
-    test_df = df.tail(int(len(df) * 0.2))
-    df = df.head(int(len(df) * 0.8))
+    test_df = df.tail(int(len(df) * 0.005))
+    df = df.head(int(len(df) * 0.995))
 
     model = trainer.train(df[feature_columns + target_columns], target_columns)
 
