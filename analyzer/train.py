@@ -62,11 +62,11 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     [df_targets, neg_target_scaler, pos_target_scaler] = scaler.scale_angle(
         df[target_columns]
     )
-    
+
     # need to set index back to df. Scaler removes the index for some reasons.
     df_features.set_index(df.index, inplace=True)
     df[feature_columns] = df_features
-    
+
     # need to set index back to df. Scaler removes the index for some reasons.
     df_targets.set_index(df.index, inplace=True)
     df[target_columns] = df_targets
@@ -102,8 +102,12 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
             trades.append(Trade(symbol, -size, close, None, next_close, None))
             balance += trades[-1].profit
 
+        trades = [t for t in trades]
+        wins = [t for t in trades if t.profit > 0]
+        loses = [t for t in trades if t.profit < 0]
+
         print(
-            f"\rBalance: {balance}, Trades: {len(trades)}, Win/Lose: {len([t for t in trades if t.profit > 0])}/{len([t for t in trades if t.profit < 0])}",
+            f"\rBalance: {balance}, Trades: {trades}, Win/Lose: {wins}/{loses}, Win Rate: {(len(wins) / len(trades)):0.2f}%",
             end="",
         )
 
