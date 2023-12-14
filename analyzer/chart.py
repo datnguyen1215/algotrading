@@ -11,6 +11,7 @@ import math
 import joblib
 import matplotlib.pyplot as plt
 import datetime
+import pytz
 
 
 def main(args):
@@ -109,12 +110,15 @@ def main(args):
         # we'll use the last close price as a reference
 
         [pred_high_angle, pred_close_angle, pred_low_angle] = angles[0]
-        
+
         # convert angles to price
         last_data = df.iloc[-1]
         last_close = last_data["close"]
         last_high = last_data["high"]
         last_low = last_data["low"]
+        last_timestamp = (
+            df.index[-1].tz_localize(pytz.timezone("Etc/GMT-2")).astimezone("Etc/GMT+5")
+        )
 
         # get radians of angle
         pred_high_r = pred_high_angle * (math.pi / 180)
@@ -135,7 +139,7 @@ def main(args):
         pred_close = last_close + pred_close_slope
         pred_low = last_low + pred_low_slope
 
-        return [last_close, pred_close]
+        return [last_timestamp, last_close, pred_close]
 
     def scale_predictions(original_preds, timeframe):
         # scale the predictions back to original form
@@ -179,21 +183,22 @@ def main(args):
     closes = []
     preds = []
     timeframes = []
+    timestamps = []
     for timeframe in models:
-        [last_close, pred_close] = make_prediction(symbol, timeframe)
+        [last_timestamp, last_close, pred_close] = make_prediction(symbol, timeframe)
         preds.append(pred_close)
         closes.append(last_close)
         timeframes.append(timeframe)
+        timestamps.append(last_timestamp)
         print(f"Prediction for {timeframe}:")
         print(
-            f"Last Close: {last_close}, Pred: {pred_close}, Change: {pred_close - last_close}"
+            f"Time: {last_timestamp}, Last Close: {last_close}, Pred: {pred_close}, Change: {pred_close - last_close}"
         )
         print("")
 
     # minutes on x-axis
-    now = datetime.datetime.now()
-    x = [now] + [
-        now + datetime.timedelta(minutes=delta.MINUTES[timeframe])
+    x = [timestamps[0]] + [
+        timestamps[0] + datetime.timedelta(minutes=delta.MINUTES[timeframe])
         for timeframe in timeframes
     ]
     x = [x.strftime("%H:%M") for x in x]
@@ -204,6 +209,7 @@ def main(args):
     plt.xlabel("Time")
     plt.ylabel("Price")
     plt.title(f"{symbol} Changes over Time")
+    plt.axhline(y=0, color="r", linestyle="-")
     plt.show()
 
 
