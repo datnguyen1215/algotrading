@@ -109,35 +109,25 @@ def main(args):
         # each prediction is an angle of the movement, so we need to convert it to a price
         # we'll use the last close price as a reference
 
-        [pred_high_angle, pred_close_angle, pred_low_angle] = angles[0]
+        pred_close_angle  = angles[0]
 
         # convert angles to price
         last_data = df.iloc[-1]
         last_close = last_data["close"]
-        last_high = last_data["high"]
-        last_low = last_data["low"]
         last_timestamp = (
             df.index[-1].tz_localize(pytz.timezone("Etc/GMT-2")).astimezone("Etc/GMT+5")
         )
 
         # get radians of angle
-        pred_high_r = pred_high_angle * (math.pi / 180)
         pred_close_r = pred_close_angle * (math.pi / 180)
-        pred_low_r = pred_low_angle * (math.pi / 180)
 
         # convert radians into tangent of the angle
-        pred_high_t = math.tan(pred_high_r)
         pred_close_t = math.tan(pred_close_r)
-        pred_low_t = math.tan(pred_low_r)
 
         # Multiple slope by delta_x
-        pred_high_slope = pred_high_t * delta.MINUTES[timeframe]
         pred_close_slope = pred_close_t * delta.MINUTES[timeframe]
-        pred_low_slope = pred_low_t * delta.MINUTES[timeframe]
 
-        pred_high = last_high + pred_high_slope
         pred_close = last_close + pred_close_slope
-        pred_low = last_low + pred_low_slope
 
         return [last_timestamp, last_close, pred_close]
 

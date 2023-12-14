@@ -86,19 +86,19 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
 
     # simulate trades
     for i in range(1, len(test_df)):
-        [pred_high, pred_close, pred_low] = predictions[i]
+        pred_close = predictions[i]
         next_close = test_df.iloc[i]["next_close"]
         close = test_df.iloc[i]["close"]
         risk = balance * 0.01
         size = risk / close
 
         # long
-        if pred_high > 0.5 and pred_close > 0.5:
+        if pred_close > 0.5:
             trades.append(Trade(symbol, size, close, None, next_close, None))
             balance += trades[-1].profit
 
         # short
-        if pred_close < 0.5 and pred_low < 0.5:
+        if pred_close < 0.5:
             trades.append(Trade(symbol, -size, close, None, next_close, None))
             balance += trades[-1].profit
 
@@ -134,9 +134,7 @@ def main():
     df = candles.get(args.symbol, args.n_candles)
 
     target_columns = [
-        "next_high_slope_angle",
         "next_close_slope_angle",
-        "next_low_slope_angle",
     ]
 
     train(args.symbol, df, "5Min", features.NAMES, target_columns)

@@ -169,8 +169,6 @@ def add_indicators(df, delta_x=5):
     df["next_close_slope_angle"] = get_angles(
         df["close"].shift(-1) - df["close"], delta_x
     )
-    df["next_high_slope_angle"] = get_angles(df["high"].shift(-1) - df["high"], delta_x)
-    df["next_low_slope_angle"] = get_angles(df["low"].shift(-1) - df["low"], delta_x)
 
     # filter prices that do not change
     close_changes = df["close"].shift(-1) - df["close"]
@@ -181,8 +179,6 @@ def add_indicators(df, delta_x=5):
 
     # use this for running simulation
     df["next_close"] = df["close"].shift(-1)
-    df["next_high"] = df["high"].shift(-1)
-    df["next_low"] = df["low"].shift(-1)
 
     return df
 

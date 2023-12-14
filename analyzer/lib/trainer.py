@@ -22,21 +22,21 @@ def train(df, target_columns=["target"]):
     X_test = test.drop(target_columns, axis=1)
     y_test = test[target_columns]
 
-    [y_pred, history, model] = train_xgb(X_train, y_train, X_test)
+    [y_pred, history, model] = train_xgb(X_train, y_train, X_test, y_test)
 
     # get mse
     mse = mean_squared_error(y_test, y_pred)
     print("mse: ", mse)
 
     # plot actual and prediction
-    # plt.plot(y_test.values[:200], label="actual")
-    # plt.plot(y_pred[:200], label="prediction")
-    # plt.legend()
-    # plt.show()
+    plt.plot(y_test.values[:200], label="actual")
+    plt.plot(y_pred[:200], label="prediction")
+    plt.legend()
+    plt.show()
     return model
 
 
-def train_nn(X_train, y_train, X_test):
+def train_nn(X_train, y_train, X_test, y_test):
     model = Sequential()
     model.add(Dense(64, input_dim=X_train.shape[1], activation="relu"))
     model.add(Dense(32, activation="relu"))
@@ -52,10 +52,10 @@ def train_nn(X_train, y_train, X_test):
     return [y_pred, history, model]
 
 
-def train_xgb(X_train, y_train, X_test):
+def train_xgb(X_train, y_train, X_test, y_test):
     xgboost.set_config(verbosity=2)
-    model = XGBRegressor(objective="reg:squarederror", n_estimators=1000, max_depth=32)
-    model.fit(X_train, y_train)
+    model = XGBRegressor(objective="reg:squarederror", n_estimators=100, max_depth=10)
+    model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=[(X_test, y_test)])
     y_pred = model.predict(X_test)
     return y_pred, [], model
 
