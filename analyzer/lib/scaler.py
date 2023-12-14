@@ -17,7 +17,7 @@ def scale(df, scaler=None):
 # since targets are angles of the movement, we need to scale them differently
 # we'll split the target into two groups, one for positive angles and one for negative angles
 # then we'll scale them separately
-def scale_angle(df):
+def scale_angle(df, positive_scaler=None, negative_scaler=None):
     df = df.copy()
 
     # create df copy
@@ -29,8 +29,10 @@ def scale_angle(df):
     positive_df[positive_df < 0] = 0
 
     # initialize scalers
-    negative_scaler = MinMaxScaler(feature_range=(0, 0.5))
-    positive_scaler = MinMaxScaler(feature_range=(0.5, 1))
+    if positive_scaler is None:
+        positive_scaler = MinMaxScaler(feature_range=(0.5, 1))
+    if negative_scaler is None:
+        negative_scaler = MinMaxScaler(feature_range=(0, 0.5))
 
     # scale positive and negative separately
     scaled_positive = positive_scaler.fit_transform(positive_df)
