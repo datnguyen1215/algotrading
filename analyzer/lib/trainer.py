@@ -29,10 +29,10 @@ def train(df, target_columns=["target"]):
     print("mse: ", mse)
 
     # plot actual and prediction
-    plt.plot(y_test.values[:200], label="actual")
-    plt.plot(y_pred[:200], label="prediction")
-    plt.legend()
-    plt.show()
+    # plt.plot(y_test.values[:200], label="actual")
+    # plt.plot(y_pred[:200], label="prediction")
+    # plt.legend()
+    # plt.show()
     return model
 
 
@@ -47,14 +47,14 @@ def train_nn(X_train, y_train, X_test, y_test):
     # regression
     optimizer = Adam(lr=0.01)
     model.compile(optimizer=optimizer, loss="mse", metrics=["mse"])
-    history = model.fit(X_train, y_train, epochs=1000, batch_size=64, verbose=1)
+    history = model.fit(X_train, y_train, epochs=100, batch_size=16, verbose=1)
     y_pred = model.predict(X_test)
     return [y_pred, history, model]
 
 
 def train_xgb(X_train, y_train, X_test, y_test):
     xgboost.set_config(verbosity=2)
-    model = XGBRegressor(objective="reg:squarederror", n_estimators=100, max_depth=10)
+    model = XGBRegressor(objective="reg:squarederror", n_estimators=100, max_depth=16)
     model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=[(X_test, y_test)])
     y_pred = model.predict(X_test)
     return y_pred, [], model

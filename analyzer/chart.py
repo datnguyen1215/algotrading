@@ -12,6 +12,7 @@ import joblib
 import matplotlib.pyplot as plt
 import datetime
 import pytz
+import numpy as np
 
 
 def main(args):
@@ -45,43 +46,33 @@ def main(args):
     }
 
     feature_scalers = {
-        "5Min": joblib.load(f"{paths['5Min']}_fs"),
-        "15Min": joblib.load(f"{paths['15Min']}_fs"),
-        "30Min": joblib.load(f"{paths['30Min']}_fs"),
-        "1H": joblib.load(f"{paths['1H']}_fs"),
-        "2H": joblib.load(f"{paths['2H']}_fs"),
-        "4H": joblib.load(f"{paths['4H']}_fs"),
-        "6H": joblib.load(f"{paths['6H']}_fs"),
-    }
-
-    target_scalers = {
         "5Min": {
-            "positive": joblib.load(f"{paths['5Min']}_pts"),
-            "negative": joblib.load(f"{paths['5Min']}_nts"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "15Min": {
-            "positive": joblib.load(f"{paths['15Min']}_pts"),
-            "negative": joblib.load(f"{paths['15Min']}_nts"),
+            "positive": joblib.load(f"{paths['15Min']}_pfs"),
+            "negative": joblib.load(f"{paths['15Min']}_nfs"),
         },
         "30Min": {
-            "positive": joblib.load(f"{paths['30Min']}_pts"),
-            "negative": joblib.load(f"{paths['30Min']}_nts"),
+            "positive": joblib.load(f"{paths['30Min']}_pfs"),
+            "negative": joblib.load(f"{paths['30Min']}_nfs"),
         },
         "1H": {
-            "positive": joblib.load(f"{paths['1H']}_pts"),
-            "negative": joblib.load(f"{paths['1H']}_nts"),
+            "positive": joblib.load(f"{paths['1H']}_pfs"),
+            "negative": joblib.load(f"{paths['1H']}_nfs"),
         },
         "2H": {
-            "positive": joblib.load(f"{paths['2H']}_pts"),
-            "negative": joblib.load(f"{paths['2H']}_nts"),
+            "positive": joblib.load(f"{paths['2H']}_pfs"),
+            "negative": joblib.load(f"{paths['2H']}_nfs"),
         },
         "4H": {
-            "positive": joblib.load(f"{paths['4H']}_pts"),
-            "negative": joblib.load(f"{paths['4H']}_nts"),
+            "positive": joblib.load(f"{paths['4H']}_pfs"),
+            "negative": joblib.load(f"{paths['4H']}_nfs"),
         },
         "6H": {
-            "positive": joblib.load(f"{paths['6H']}_pts"),
-            "negative": joblib.load(f"{paths['6H']}_nts"),
+            "positive": joblib.load(f"{paths['6H']}_pfs"),
+            "negative": joblib.load(f"{paths['6H']}_nfs"),
         },
     }
 
@@ -99,17 +90,20 @@ def main(args):
 
         df = candles.add_indicators(df)
 
-        [df_features, df_scaler] = scaler.scale(
-            df[features.NAMES], feature_scalers[timeframe]
+        [df_features, _, _] = scaler.scale_angle(
+            df[features.NAMES],
+            feature_scalers[timeframe]["positive"],
+            feature_scalers[timeframe]["negative"],
         )
 
         predictions = models[timeframe].predict(df_features[-1:])
-        angles = scale_predictions(predictions, timeframe)
+        angles = np.exp(predictions)
+        # angles = scale_predictions(predictions, timeframe)
 
         # each prediction is an angle of the movement, so we need to convert it to a price
         # we'll use the last close price as a reference
 
-        pred_close_angle  = angles[0]
+        pred_close_angle = angles[0]
 
         # convert angles to price
         last_data = df.iloc[-1]
