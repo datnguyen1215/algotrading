@@ -107,7 +107,7 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
         loses = [t for t in trades if t.profit < 0]
 
         print(
-            f"\rBalance: {balance}, Trades: {trades}, Win/Lose: {wins}/{loses}, Win Rate: {(len(wins) / len(trades)):0.2f}%",
+            f"\rBalance: {balance}, Trades: {len(trades)}, Win/Lose: {len(wins)}/{len(loses)}, Win Rate: {(len(wins) / len(trades) * 100):0.2f}%",
             end="",
         )
 
