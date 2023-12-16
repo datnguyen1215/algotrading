@@ -10,6 +10,23 @@ import argparse
 from simulation.trade import Trade
 import numpy as np
 import pandas as pd
+from lib import targets
+
+
+def filter_candles(df):
+    start_time = "10:00:00"
+    end_time = "23:00:00"
+
+    print("Filtering candles from " + start_time + " to " + end_time)
+    df = df.between_time(start_time, end_time)
+    print("Done filtering candles")
+
+    # filter to weekdays
+    print("Filtering candles to weekdays")
+    df = df[df.index.dayofweek < 5]
+    print("Done filtering candles to weekdays")
+
+    return df
 
 
 def remove_outliers(df, columns):
@@ -180,17 +197,13 @@ def main():
 
     df = candles.get(args.symbol, args.n_candles)
 
-    target_columns = [
-        "next_close_slope_angle",
-    ]
-
-    train(args.symbol, df, "5Min", features.NAMES, target_columns)
-    train(args.symbol, df, "15Min", features.NAMES, target_columns)
-    train(args.symbol, df, "30Min", features.NAMES, target_columns)
-    train(args.symbol, df, "1H", features.NAMES, target_columns)
-    train(args.symbol, df, "2H", features.NAMES, target_columns)
-    train(args.symbol, df, "4H", features.NAMES, target_columns)
-    train(args.symbol, df, "6H", features.NAMES, target_columns)
+    train(args.symbol, df, "5Min", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "15Min", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "30Min", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "1H", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "2H", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "4H", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "6H", features.NAMES, targets.NAMES)
 
 
 if __name__ == "__main__":
