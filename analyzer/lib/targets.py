@@ -1,5 +1,3 @@
-NAME = [
-    "next_high_slope_angle",
+NAMES = [
     "next_close_slope_angle",
-    "next_low_slope_angle",
 ]
