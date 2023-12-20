@@ -93,26 +93,6 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     # remove_outliers sometimes would have NaNs, so we need to drop them
     df.dropna(inplace=True)
 
-    # scale the features only
-    [df_features, neg_features_scaler, pos_features_scaler] = scaler.scale_angle(
-        df[feature_columns]
-    )
-
-    [df_targets, neg_target_scaler, pos_target_scaler] = scaler.scale_angle(
-        df[target_columns]
-    )
-
-    # need to set index back to df. Scaler removes the index for some reasons.
-    df_features.set_index(df.index, inplace=True)
-    df[feature_columns] = df_features
-
-    # need to set index back to df. Scaler removes the index for some reasons.
-    df_targets.set_index(df.index, inplace=True)
-    df[target_columns] = df_targets
-
-    # need to drop NaNs after scaling, otherwise, it'll contain NaNs for some reasons.
-    df.dropna(inplace=True)
-
     # split data into 20% test and 80% train
     test_df = df.tail(int(len(df) * 0.02))
     df = df.head(int(len(df) * 0.8))
@@ -172,10 +152,6 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
         os.makedirs("models")
 
     joblib.dump(model, f"models/{symbol}_{timeframe}_m")
-    joblib.dump(neg_features_scaler, f"models/{symbol}_{timeframe}_nfs")
-    joblib.dump(pos_features_scaler, f"models/{symbol}_{timeframe}_pfs")
-    joblib.dump(neg_target_scaler, f"models/{symbol}_{timeframe}_nts")
-    joblib.dump(pos_target_scaler, f"models/{symbol}_{timeframe}_pts")
 
 
 def main():
