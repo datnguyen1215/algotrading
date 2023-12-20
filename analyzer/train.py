@@ -67,6 +67,55 @@ def remove_outliers_using_bins(df, column, n_bins):
     return df
 
 
+def simulate_test(df, predictions):
+    results = []
+    trades = []
+    balance = 100000
+
+    # simulate trades
+    for i in range(0, len(df)):
+        pred_close = predictions[i]
+        next_close = df.iloc[i]["next_close"]
+        close = df.iloc[i]["close"]
+        risk = balance * 0.01
+        size = risk / close
+
+        # long
+        if pred_close > 0.5:
+            trades.append(Trade('', size, close, None, next_close, None))
+            balance += trades[-1].profit
+            if trades[-1].profit > 0:
+                results.append(1)
+            else:
+                results.append(-1)
+
+        # short
+        if pred_close < 0.5:
+            trades.append(Trade('', -size, close, None, next_close, None))
+            balance += trades[-1].profit
+
+            if trades[-1].profit > 0:
+                results.append(1)
+            else:
+                results.append(-1)
+
+        if pred_close == 0.5:
+            results.append(0)
+
+        wins = [t for t in trades if t.profit > 0]
+        loses = [t for t in trades if t.profit < 0]
+        buys = [t for t in trades if t.size > 0]
+        sells = [t for t in trades if t.size < 0]
+
+        print_inline(
+            f"\rBalance: {balance}, Trades: {len(trades)}, Win/Lose: {len(wins)}/{len(loses)}, Win Rate: {(len(wins) / len(trades) * 100):0.2f}%, Buy/Sell: {len(buys)}/{len(sells)}"
+        )
+
+    print("")
+
+    print(f"predictions length: {len(predictions)}, results length: {len(results)}")
+
+
 def train(symbol, original_df, timeframe, feature_columns, target_columns):
     print(f"Training {symbol} {timeframe}...")
 
@@ -100,52 +149,8 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     model = trainer.train(df[feature_columns + target_columns], target_columns)
 
     predictions = model.predict(test_df[feature_columns])
-    results = []
-    trades = []
-    balance = 100000
 
-    # simulate trades
-    for i in range(0, len(test_df)):
-        pred_close = predictions[i]
-        next_close = test_df.iloc[i]["next_close"]
-        close = test_df.iloc[i]["close"]
-        risk = balance * 0.01
-        size = risk / close
-
-        # long
-        if pred_close > 0.5:
-            trades.append(Trade(symbol, size, close, None, next_close, None))
-            balance += trades[-1].profit
-            if trades[-1].profit > 0:
-                results.append(1)
-            else:
-                results.append(-1)
-
-        # short
-        if pred_close < 0.5:
-            trades.append(Trade(symbol, -size, close, None, next_close, None))
-            balance += trades[-1].profit
-
-            if trades[-1].profit > 0:
-                results.append(1)
-            else:
-                results.append(-1)
-
-        if pred_close == 0.5:
-            results.append(0)
-
-        wins = [t for t in trades if t.profit > 0]
-        loses = [t for t in trades if t.profit < 0]
-        buys = [t for t in trades if t.size > 0]
-        sells = [t for t in trades if t.size < 0]
-
-        print_inline(
-            f"\rBalance: {balance}, Trades: {len(trades)}, Win/Lose: {len(wins)}/{len(loses)}, Win Rate: {(len(wins) / len(trades) * 100):0.2f}%, Buy/Sell: {len(buys)}/{len(sells)}"
-        )
-
-    print("")
-
-    print(f"predictions length: {len(predictions)}, results length: {len(results)}")
+    simulate_test(test_df, predictions)
 
     # check if models directory exists
     if not os.path.exists("models"):
