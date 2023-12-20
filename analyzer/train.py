@@ -14,6 +14,20 @@ from lib import targets
 import lib.delta as DELTA
 
 
+def print_inline(text):
+    # get the previous text size
+    size = len(text)
+
+    # print the text
+    print(text, end="")
+    # print spaces to clear the previous text
+    print(" " * (100 - size), end="")
+    # move the cursor back to the beginning of the line
+    print("\r", end="")
+    # flush the buffer
+    print("", end="", flush=True)
+
+
 def filter_candles(df):
     start_time = "10:00:00"
     end_time = "23:00:00"
@@ -75,11 +89,6 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
 
     # remove feature outliers so we can scale the features properly
     df = remove_outliers(df, feature_columns)
-
-    # df = remove_outliers_using_bins(df, "next_close_slope_angle", 100)
-
-    dtale.show(df[feature_columns + target_columns]).open_browser()
-    input("Press Enter to continue...")
 
     # remove_outliers sometimes would have NaNs, so we need to drop them
     df.dropna(inplace=True)
@@ -150,22 +159,13 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
         buys = [t for t in trades if t.size > 0]
         sells = [t for t in trades if t.size < 0]
 
-        print(
-            f"\rBalance: {balance}, Trades: {len(trades)}, Win/Lose: {len(wins)}/{len(loses)}, Win Rate: {(len(wins) / len(trades) * 100):0.2f}%, Buy/Sell: {len(buys)}/{len(sells)}",
-            end="",
+        print_inline(
+            f"\rBalance: {balance}, Trades: {len(trades)}, Win/Lose: {len(wins)}/{len(loses)}, Win Rate: {(len(wins) / len(trades) * 100):0.2f}%, Buy/Sell: {len(buys)}/{len(sells)}"
         )
 
     print("")
 
     print(f"predictions length: {len(predictions)}, results length: {len(results)}")
-
-    # put results and predictions in a dataframe
-    test_df["prediction"] = predictions
-    test_df["result"] = np.array(results)
-
-    # show dataframe
-    dtale.show(test_df[["close", "next_close", "prediction", "result"]]).open_browser()
-    input("Press Enter to continue...")
 
     # check if models directory exists
     if not os.path.exists("models"):
