@@ -15,16 +15,7 @@ import pytz
 import numpy as np
 
 
-def main(args):
-    symbol = args.symbol
-    n_candles = args.n_candles
-    model_directory = args.model_directory
-
-    server_socket = start_server()
-    client_socket = accept_client(server_socket)
-
-    expert = Expert(client_socket)
-
+def get_models(symbol, model_directory):
     paths = {
         "5Min": f"{model_directory}/{symbol}_5Min",
         "15Min": f"{model_directory}/{symbol}_15Min",
@@ -36,140 +27,85 @@ def main(args):
     }
 
     models = {
-        "5Min": joblib.load(f"{paths['5Min']}_m"),
-        "15Min": joblib.load(f"{paths['15Min']}_m"),
-        "30Min": joblib.load(f"{paths['30Min']}_m"),
-        "1H": joblib.load(f"{paths['1H']}_m"),
-        "2H": joblib.load(f"{paths['2H']}_m"),
-        "4H": joblib.load(f"{paths['4H']}_m"),
-        "6H": joblib.load(f"{paths['6H']}_m"),
+        "5Min": joblib.load(f"{paths['5Min']}_m.joblib"),
+        "15Min": joblib.load(f"{paths['15Min']}_m.joblib"),
+        "30Min": joblib.load(f"{paths['30Min']}_m.joblib"),
+        "1H": joblib.load(f"{paths['1H']}_m.joblib"),
+        "2H": joblib.load(f"{paths['2H']}_m.joblib"),
+        "4H": joblib.load(f"{paths['4H']}_m.joblib"),
+        "6H": joblib.load(f"{paths['6H']}_m.joblib"),
     }
 
-    feature_scalers = {
-        "5Min": {
-            "positive": joblib.load(f"{paths['5Min']}_pfs"),
-            "negative": joblib.load(f"{paths['5Min']}_nfs"),
-        },
-        "15Min": {
-            "positive": joblib.load(f"{paths['15Min']}_pfs"),
-            "negative": joblib.load(f"{paths['15Min']}_nfs"),
-        },
-        "30Min": {
-            "positive": joblib.load(f"{paths['30Min']}_pfs"),
-            "negative": joblib.load(f"{paths['30Min']}_nfs"),
-        },
-        "1H": {
-            "positive": joblib.load(f"{paths['1H']}_pfs"),
-            "negative": joblib.load(f"{paths['1H']}_nfs"),
-        },
-        "2H": {
-            "positive": joblib.load(f"{paths['2H']}_pfs"),
-            "negative": joblib.load(f"{paths['2H']}_nfs"),
-        },
-        "4H": {
-            "positive": joblib.load(f"{paths['4H']}_pfs"),
-            "negative": joblib.load(f"{paths['4H']}_nfs"),
-        },
-        "6H": {
-            "positive": joblib.load(f"{paths['6H']}_pfs"),
-            "negative": joblib.load(f"{paths['6H']}_nfs"),
-        },
-    }
+    return models
 
-    def make_prediction(symbol, timeframe):
-        data = expert.get_candles(symbol, timeframe, n_candles)
-        df = pd.DataFrame(data)
 
-        # set 'time' as index datetime
-        df["time"] = pd.to_datetime(df["time"])
-        df = df.set_index("time")
-        df = df.sort_index()
+def wait_for_expert():
+    server_socket = start_server()
+    client_socket = accept_client(server_socket)
 
-        # remove last candle since it's not complete
-        df = df[:-1]
+    expert = Expert(client_socket)
+    return expert
 
-        df = candles.add_indicators(df)
 
-        [df_features, _, _] = scaler.scale_angle(
-            df[features.NAMES],
-            feature_scalers[timeframe]["positive"],
-            feature_scalers[timeframe]["negative"],
-        )
+def make_prediction(df, timeframe, feature_models):
+    df = pd.DataFrame(df)
 
-        predictions = models[timeframe].predict(df_features[-1:])
-        angles = np.exp(predictions)
-        # angles = scale_predictions(predictions, timeframe)
+    # set 'time' as index datetime
+    df["time"] = pd.to_datetime(df["time"])
+    df = df.set_index("time")
+    df = df.sort_index()
 
-        # each prediction is an angle of the movement, so we need to convert it to a price
-        # we'll use the last close price as a reference
+    # remove last candle since it's not complete
+    df = df[:-1]
 
-        pred_close_angle = angles[0]
+    df = candles.add_indicators(df)
 
-        # convert angles to price
-        last_data = df.iloc[-1]
-        last_close = last_data["close"]
-        last_timestamp = (
-            df.index[-1].tz_localize(pytz.timezone("Etc/GMT-2")).astimezone("Etc/GMT+5")
-        )
+    predictions = np.array([])
+    for feature, model in feature_models.items():
+        df_features = df[feature][-1:]
+        pred = model.predict(df_features)
+        predictions = np.append(predictions, pred)
 
-        # get radians of angle
-        pred_close_r = pred_close_angle * (math.pi / 180)
+    # get average of all predictions
+    pred = np.average(predictions)
 
-        # convert radians into tangent of the angle
-        pred_close_t = math.tan(pred_close_r)
+    # convert angles to price
+    last_data = df.iloc[-1]
+    last_close = last_data["close"]
+    last_timestamp = (
+        df.index[-1].tz_localize(pytz.timezone("Etc/GMT-2")).astimezone("Etc/GMT+5")
+    )
 
-        # Multiple slope by delta_x
-        pred_close_slope = pred_close_t * delta.MINUTES[timeframe]
+    # get radians of angle
+    pred_angle = pred
+    pred_close_r = pred_angle * (math.pi / 180)
+    pred_close_t = math.tan(pred_close_r)
+    pred_close_slope = pred_close_t * delta.MINUTES[timeframe]
+    pred_close = last_close + pred_close_slope
 
-        pred_close = last_close + pred_close_slope
+    return [last_timestamp, last_close, pred_close]
 
-        return [last_timestamp, last_close, pred_close]
 
-    def scale_predictions(original_preds, timeframe):
-        # scale the predictions back to original form
-        # anything that's negative, use the negative scaler
-        # anything that's positive, use the positive scaler
+def main(args):
+    symbol = args.symbol
+    n_candles = args.n_candles
+    model_directory = args.model_directory
 
-        predictions = original_preds.copy()
-
-        # make a copy for < 0.5 and >= 0.5
-        negative_predictions = predictions.copy()
-        positive_predictions = predictions.copy()
-
-        # set anything >= 0.5 to 0
-        negative_predictions[negative_predictions >= 0.5] = 0
-
-        # set anything < 0.5 to 0
-        positive_predictions[positive_predictions < 0.5] = 0
-
-        # scale the negative predictions
-        negative_predictions = target_scalers[timeframe]["negative"].inverse_transform(
-            negative_predictions
-        )
-
-        # scale the positive predictions
-        positive_predictions = target_scalers[timeframe]["positive"].inverse_transform(
-            positive_predictions
-        )
-
-        # if original_preds value is < 0, use negative predictions
-        # if original_preds value is >= 0, use positive predictions
-        for i in range(len(predictions)):
-            for j in range(len(predictions[i])):
-                if predictions[i][j] < 0.5:
-                    predictions[i][j] = negative_predictions[i][j]
-                else:
-                    predictions[i][j] = positive_predictions[i][j]
-
-        return predictions
+    expert = wait_for_expert()
 
     # go through all timeframes
     closes = []
     preds = []
     timeframes = []
     timestamps = []
-    for timeframe in models:
-        [last_timestamp, last_close, pred_close] = make_prediction(symbol, timeframe)
+
+    all_models = get_models(symbol, model_directory)
+
+    for timeframe, feature_models in all_models.items():
+        df = expert.get_candles(symbol, timeframe, n_candles)
+        [last_timestamp, last_close, pred_close] = make_prediction(
+            df, timeframe, feature_models
+        )
         preds.append(pred_close)
         closes.append(last_close)
         timeframes.append(timeframe)

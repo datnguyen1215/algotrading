@@ -118,11 +118,11 @@ def simulate_test(df, predictions):
 
 def train_models(df, feature_columns, target_columns):
     # train multiple models, each for a single feature
-    models = []
+    models = {}
     for feature in feature_columns:
         print(f"Training model for {feature}...")
         model = trainer.train(df[[feature] + target_columns], target_columns)
-        models.append(model)
+        models[feature] = model
 
     return models
 
@@ -153,10 +153,6 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     # remove_outliers sometimes would have NaNs, so we need to drop them
     df.dropna(inplace=True)
 
-    # split data into 20% test and 80% train
-    test_df = df.tail(int(len(df) * 0.02))
-    df = df.head(int(len(df) * 0.8))
-
     models = train_models(df, feature_columns, target_columns)
 
     # check if models directory exists
@@ -164,7 +160,7 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
         os.makedirs("models")
 
     # save all models into a single file
-    joblib.dump(models, f"models/{symbol}_{timeframe}.joblib")
+    joblib.dump(models, f"models/{symbol}_{timeframe}_m.joblib")
 
 
 def main():
