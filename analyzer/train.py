@@ -2,7 +2,6 @@
 from lib import features
 from lib import candles
 from lib import trainer
-from lib import scaler
 import dtale
 import joblib
 import os
@@ -12,6 +11,7 @@ import numpy as np
 import pandas as pd
 from lib import targets
 import lib.delta as DELTA
+from sklearn.preprocessing import MinMaxScaler
 
 
 def print_inline(text):
@@ -127,6 +127,41 @@ def train_models(df, feature_columns, target_columns):
     return models
 
 
+def scale_target(df, columns):
+    df = df.copy()
+
+    # make a copy so it doesn't affect the original dataframe
+    pos_df = df[df[columns] > 0].copy()
+    neg_df = df[df[columns] < 0].copy()
+
+    if len(columns) == 1:
+        columns = columns[0]
+
+    # any negative/positive values should be assigned to 0
+    # so that we can scale only respective values
+    pos_scaler = MinMaxScaler(feature_range=(0, 4))
+    neg_scaler = MinMaxScaler(feature_range=(-4, 0))
+
+    # scale the positive values only
+    pos_transformed = pos_scaler.fit_transform(pos_df)
+
+    # scale negative values only
+    neg_transformed = neg_scaler.fit_transform(neg_df)
+
+    # assign the scaled values back to the original dataframe
+    df.loc[pos_df.index, columns] = np.where(
+        pos_transformed > 0, pos_transformed, 0
+    ).ravel()
+    df.loc[neg_df.index, columns] = np.where(
+        neg_transformed < 0, neg_transformed, 0
+    ).ravel()
+
+    # round to integer
+    df[columns] = df[columns].round().astype(int)
+
+    return [df, neg_scaler, pos_scaler]
+
+
 def train(symbol, original_df, timeframe, feature_columns, target_columns):
     print(f"Training {symbol} {timeframe}...")
 
@@ -152,6 +187,12 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
 
     # remove_outliers sometimes would have NaNs, so we need to drop them
     df.dropna(inplace=True)
+
+    [df_targets, neg_target_scaler, pos_target_scaler] = scale_target(
+        df[target_columns], target_columns
+    )
+
+    df[target_columns] = df_targets
 
     models = train_models(df, feature_columns, target_columns)
 
@@ -180,6 +221,7 @@ def main():
     train(args.symbol, df, "2H", features.NAMES, targets.NAMES)
     train(args.symbol, df, "4H", features.NAMES, targets.NAMES)
     train(args.symbol, df, "6H", features.NAMES, targets.NAMES)
+    train(args.symbol, df, "1D", features.NAMES, targets.NAMES)
 
 
 if __name__ == "__main__":
