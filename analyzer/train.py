@@ -123,6 +123,8 @@ def train_models(df, feature_columns, target_columns):
         print(f"Training model for {feature}...")
         model = trainer.train(df[[feature] + target_columns], target_columns)
         models[feature] = model
+        print(model.feature_importances_)
+        input("Press Enter to continue...")
 
     return models
 
@@ -162,6 +164,16 @@ def scale_target(df, columns):
     return [df, neg_scaler, pos_scaler]
 
 
+def scale_target2(df, columns):
+    df = df.copy()
+    # scale to be between -4 and 4
+    scaler = MinMaxScaler(feature_range=(-4, 4))
+    scaled_data = scaler.fit_transform(df[columns])
+
+    df = pd.DataFrame(scaled_data, columns=columns, index=df.index)
+    return [df, scaler]
+
+
 def train(symbol, original_df, timeframe, feature_columns, target_columns):
     print(f"Training {symbol} {timeframe}...")
 
@@ -172,6 +184,8 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
         df = candles.resample_df(df, timeframe)
 
     df = candles.add_indicators(df, DELTA.MINUTES[timeframe])
+
+    print(df.head())
 
     # should drop NaNs after adding indicators, some of them has NaNs
     df.dropna(inplace=True)
@@ -188,11 +202,17 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     # remove_outliers sometimes would have NaNs, so we need to drop them
     df.dropna(inplace=True)
 
-    [df_targets, neg_target_scaler, pos_target_scaler] = scale_target(
-        df[target_columns], target_columns
-    )
+    # [df_targets, neg_target_scaler, pos_target_scaler] = scale_target(
+    #     df[target_columns], target_columns
+    # )
+
+    [df_targets, target_scaler] = scale_target2(df[target_columns], target_columns)
+
+    # scale the features
 
     df[target_columns] = df_targets
+
+    df.dropna(inplace=True)
 
     models = train_models(df, feature_columns, target_columns)
 

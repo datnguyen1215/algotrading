@@ -170,15 +170,51 @@ def add_indicators(df, delta_x=5):
         df["close"].shift(-1) - df["close"], delta_x
     )
 
+    # replace NaNs with 0s for fft
+    df = df.fillna(0)
+
+    # ffft transforms
+    df["rsi_7_slope_angle_fft"] = np.real(np.fft.fft(df["rsi_7_slope_angle"]))
+    df["rsi_7_sma_slope_angle_fft"] = np.real(np.fft.fft(df["rsi_7_sma_slope_angle"]))
+    df["rsi_14_slope_angle_fft"] = np.real(np.fft.fft(df["rsi_14_slope_angle"]))
+    df["rsi_14_sma_slope_angle_fft"] = np.real(np.fft.fft(df["rsi_14_sma_slope_angle"]))
+    df["avg_ema_3_slope_angle_fft"] = np.real(np.fft.fft(df["avg_ema_3_slope_angle"]))
+    df["avg_ema_5_slope_angle_fft"] = np.real(np.fft.fft(df["avg_ema_5_slope_angle"]))
+    df["avg_ema_8_slope_angle_fft"] = np.real(np.fft.fft(df["avg_ema_8_slope_angle"]))
+    df["avg_ema_13_slope_angle_fft"] = np.real(np.fft.fft(df["avg_ema_13_slope_angle"]))
+    df["avg_ema_21_slope_angle_fft"] = np.real(np.fft.fft(df["avg_ema_21_slope_angle"]))
+    df["macd_6_13_slope_angle_fft"] = np.real(np.fft.fft(df["macd_6_13_slope_angle"]))
+    df["macd_6_13_ema_slope_angle_fft"] = np.real(
+        np.fft.fft(df["macd_6_13_ema_slope_angle"])
+    )
+    df["macd_12_26_slope_angle_fft"] = np.real(np.fft.fft(df["macd_12_26_slope_angle"]))
+    df["macd_12_26_ema_slope_angle_fft"] = np.real(
+        np.fft.fft(df["macd_12_26_ema_slope_angle"])
+    )
+    df["stoch_5_5_k_slope_angle_fft"] = np.real(
+        np.fft.fft(df["stoch_5_5_k_slope_angle"])
+    )
+    df["stoch_5_5_d_slope_angle_fft"] = np.real(
+        np.fft.fft(df["stoch_5_5_d_slope_angle"])
+    )
+    df["stoch_10_10_k_slope_angle_fft"] = np.real(
+        np.fft.fft(df["stoch_10_10_k_slope_angle"])
+    )
+    df["stoch_10_10_d_slope_angle_fft"] = np.real(
+        np.fft.fft(df["stoch_10_10_d_slope_angle"])
+    )
+    df["di_plus_slope_angle_fft"] = np.real(np.fft.fft(df["di_plus_slope_angle"]))
+    df["di_minus_slope_angle_fft"] = np.real(np.fft.fft(df["di_minus_slope_angle"]))
+
+    # use this for running simulation
+    df["next_close"] = df["close"].shift(-1)
+
     # filter prices that do not change
     close_changes = df["close"].shift(-1) - df["close"]
     high_changes = df["high"].shift(-1) - df["high"]
     low_changes = df["low"].shift(-1) - df["low"]
 
     df[(close_changes == 0) & (high_changes == 0) & (low_changes == 0)] = np.nan
-
-    # use this for running simulation
-    df["next_close"] = df["close"].shift(-1)
 
     return df
 
