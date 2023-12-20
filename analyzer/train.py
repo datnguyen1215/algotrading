@@ -11,6 +11,7 @@ from simulation.trade import Trade
 import numpy as np
 import pandas as pd
 from lib import targets
+import lib.delta as DELTA
 
 
 def filter_candles(df):
@@ -61,17 +62,7 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     if timeframe != "5Min":
         df = candles.resample_df(df, timeframe)
 
-    delta_map = {
-        "5Min": 5,
-        "15Min": 15,
-        "30Min": 30,
-        "1H": 60,
-        "2H": 120,
-        "4H": 240,
-        "6H": 360,
-    }
-
-    df = candles.add_indicators(df, delta_map[timeframe])
+    df = candles.add_indicators(df, DELTA.MINUTES[timeframe])
 
     # should drop NaNs after adding indicators, some of them has NaNs
     df.dropna(inplace=True)
