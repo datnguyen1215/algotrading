@@ -82,7 +82,7 @@ def simulate_test(df, predictions):
 
         # long
         if pred_close > 0.5:
-            trades.append(Trade("", size, close, None, next_close, None))
+            trades.append(Trade('', size, close, None, next_close, None))
             balance += trades[-1].profit
             if trades[-1].profit > 0:
                 results.append(1)
@@ -91,7 +91,7 @@ def simulate_test(df, predictions):
 
         # short
         if pred_close < 0.5:
-            trades.append(Trade("", -size, close, None, next_close, None))
+            trades.append(Trade('', -size, close, None, next_close, None))
             balance += trades[-1].profit
 
             if trades[-1].profit > 0:
@@ -114,17 +114,6 @@ def simulate_test(df, predictions):
     print("")
 
     print(f"predictions length: {len(predictions)}, results length: {len(results)}")
-
-
-def train_models(df, feature_columns, target_columns):
-    # train multiple models, each for a single feature
-    models = []
-    for feature in feature_columns:
-        print(f"Training model for {feature}...")
-        model = trainer.train(df[[feature] + target_columns], target_columns)
-        models.append(model)
-
-    return models
 
 
 def train(symbol, original_df, timeframe, feature_columns, target_columns):
@@ -157,14 +146,17 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     test_df = df.tail(int(len(df) * 0.02))
     df = df.head(int(len(df) * 0.8))
 
-    models = train_models(df, feature_columns, target_columns)
+    model = trainer.train(df[feature_columns + target_columns], target_columns)
+
+    predictions = model.predict(test_df[feature_columns])
+
+    simulate_test(test_df, predictions)
 
     # check if models directory exists
     if not os.path.exists("models"):
         os.makedirs("models")
 
-    # save all models into a single file
-    joblib.dump(models, f"models/{symbol}_{timeframe}.joblib")
+    joblib.dump(model, f"models/{symbol}_{timeframe}_m")
 
 
 def main():
