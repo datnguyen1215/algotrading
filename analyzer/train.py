@@ -81,7 +81,7 @@ def simulate_test(df, predictions):
         size = risk / close
 
         # long
-        if pred_close > 0.5:
+        if pred_close > 0:
             trades.append(Trade('', size, close, None, next_close, None))
             balance += trades[-1].profit
             if trades[-1].profit > 0:
@@ -90,7 +90,7 @@ def simulate_test(df, predictions):
                 results.append(-1)
 
         # short
-        if pred_close < 0.5:
+        if pred_close < 0:
             trades.append(Trade('', -size, close, None, next_close, None))
             balance += trades[-1].profit
 
@@ -99,7 +99,7 @@ def simulate_test(df, predictions):
             else:
                 results.append(-1)
 
-        if pred_close == 0.5:
+        if pred_close == 0:
             results.append(0)
 
         wins = [t for t in trades if t.profit > 0]
@@ -149,6 +149,7 @@ def train(symbol, original_df, timeframe, feature_columns, target_columns):
     model = trainer.train(df[feature_columns + target_columns], target_columns)
 
     predictions = model.predict(test_df[feature_columns])
+    print(f"predictions: {predictions}")
 
     simulate_test(test_df, predictions)
 
@@ -167,16 +168,17 @@ def main():
 
     print(f"args.symbol: {args.symbol}, args.n_candles: {args.n_candles}")
 
+    feature_names = features.NAMES.copy()
+    for i in range(0, 5):
+        for feature in features.NAMES:
+            feature_names.append(f"{feature}_{i+2}")
+
+    print(feature_names)
+
     df = candles.get(args.symbol, args.n_candles)
 
-    train(args.symbol, df, "5Min", features.NAMES, targets.NAMES)
-    train(args.symbol, df, "15Min", features.NAMES, targets.NAMES)
-    train(args.symbol, df, "30Min", features.NAMES, targets.NAMES)
-    train(args.symbol, df, "1H", features.NAMES, targets.NAMES)
-    train(args.symbol, df, "2H", features.NAMES, targets.NAMES)
-    train(args.symbol, df, "4H", features.NAMES, targets.NAMES)
-    train(args.symbol, df, "6H", features.NAMES, targets.NAMES)
 
+    train(args.symbol, df, "5Min", features.NAMES, targets.NAMES)
 
 if __name__ == "__main__":
     main()

@@ -27,22 +27,22 @@ def main(args):
 
     paths = {
         "5Min": f"{model_directory}/{symbol}_5Min",
-        "15Min": f"{model_directory}/{symbol}_15Min",
-        "30Min": f"{model_directory}/{symbol}_30Min",
-        "1H": f"{model_directory}/{symbol}_1H",
-        "2H": f"{model_directory}/{symbol}_2H",
-        "4H": f"{model_directory}/{symbol}_4H",
-        "6H": f"{model_directory}/{symbol}_6H",
+        "15Min": f"{model_directory}/{symbol}_5Min",
+        "30Min": f"{model_directory}/{symbol}_5Min",
+        "1H": f"{model_directory}/{symbol}_5Min",
+        "2H": f"{model_directory}/{symbol}_5Min",
+        "4H": f"{model_directory}/{symbol}_5Min",
+        "6H": f"{model_directory}/{symbol}_5Min",
     }
 
     models = {
         "5Min": joblib.load(f"{paths['5Min']}_m"),
-        "15Min": joblib.load(f"{paths['15Min']}_m"),
-        "30Min": joblib.load(f"{paths['30Min']}_m"),
-        "1H": joblib.load(f"{paths['1H']}_m"),
-        "2H": joblib.load(f"{paths['2H']}_m"),
-        "4H": joblib.load(f"{paths['4H']}_m"),
-        "6H": joblib.load(f"{paths['6H']}_m"),
+        "15Min": joblib.load(f"{paths['5Min']}_m"),
+        "30Min": joblib.load(f"{paths['5Min']}_m"),
+        "1H": joblib.load(f"{paths['5Min']}_m"),
+        "2H": joblib.load(f"{paths['5Min']}_m"),
+        "4H": joblib.load(f"{paths['5Min']}_m"),
+        "6H": joblib.load(f"{paths['5Min']}_m"),
     }
 
     feature_scalers = {
@@ -51,28 +51,28 @@ def main(args):
             "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "15Min": {
-            "positive": joblib.load(f"{paths['15Min']}_pfs"),
-            "negative": joblib.load(f"{paths['15Min']}_nfs"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "30Min": {
-            "positive": joblib.load(f"{paths['30Min']}_pfs"),
-            "negative": joblib.load(f"{paths['30Min']}_nfs"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "1H": {
-            "positive": joblib.load(f"{paths['1H']}_pfs"),
-            "negative": joblib.load(f"{paths['1H']}_nfs"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "2H": {
-            "positive": joblib.load(f"{paths['2H']}_pfs"),
-            "negative": joblib.load(f"{paths['2H']}_nfs"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "4H": {
-            "positive": joblib.load(f"{paths['4H']}_pfs"),
-            "negative": joblib.load(f"{paths['4H']}_nfs"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
         "6H": {
-            "positive": joblib.load(f"{paths['6H']}_pfs"),
-            "negative": joblib.load(f"{paths['6H']}_nfs"),
+            "positive": joblib.load(f"{paths['5Min']}_pfs"),
+            "negative": joblib.load(f"{paths['5Min']}_nfs"),
         },
     }
 

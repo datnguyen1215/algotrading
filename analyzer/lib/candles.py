@@ -31,37 +31,53 @@ def get_angles(series, delta_x=5):
     return np.degrees(np.arctan(slopes))
 
 
+def add_lookback(df, lookback=5):
+    new_df = pd.DataFrame()
+
+    for i in range(0, lookback):
+        # for each column
+        for column in df.columns:
+            new_df[f"{column}_{i+2}"] = df[column].shift(i)
+
+    return new_df
+
+
+
 def add_indicators(df, delta_x=5):
     # include rsi 7 and sma of the rsi 7
     rsi_7 = ta.momentum.rsi(df["close"], window=7)
     rsi_7_sma = ta.trend.sma_indicator(rsi_7, window=7)
+    rsi_7_close_sma_distance = rsi_7 - rsi_7_sma
 
     df["rsi_7_slope_angle"] = get_angles(rsi_7.diff(), delta_x)
+    df['rsi_7_slope_angle_diff'] = rsi_7.diff()
+    df['rsi_7_slope_angle_diff_angle'] = get_angles(rsi_7.diff(), delta_x)
+
     df["rsi_7_sma_slope_angle"] = get_angles(rsi_7_sma.diff(), delta_x)
+    df['rsi_7_sma_slope_angle_diff'] = rsi_7_sma.diff()
+    df['rsi_7_sma_slope_angle_diff_angle'] = get_angles(rsi_7_sma.diff(), delta_x)
 
-    df["rsi_7_slope_angle_2"] = df["rsi_7_slope_angle"].shift()
-    df["rsi_7_sma_slope_angle_2"] = df["rsi_7_slope_angle"].shift()
-
-    df["rsi_7_slope_angle_3"] = df["rsi_7_slope_angle"].shift(2)
-    df["rsi_7_sma_slope_angle_3"] = df["rsi_7_slope_angle"].shift(2)
+    df['rsi_7_close_sma_distance_slope_angle'] = get_angles(rsi_7_close_sma_distance.diff(), delta_x)
+    df['rsi_7_close_sma_distance_slope_angle_diff'] = rsi_7_close_sma_distance.diff()
+    df['rsi_7_close_sma_distance_slope_angle_diff_angle'] = get_angles(rsi_7_close_sma_distance.diff(), delta_x)
 
     # include rsi 14 and sma 14 of the rsi
     rsi_14 = ta.momentum.rsi(df["close"], window=14)
     rsi_14_sma = ta.trend.sma_indicator(rsi_14, window=14)
+    rsi_14_close_sma_distance = rsi_14 - rsi_14_sma
 
     df["rsi_14_slope_angle"] = get_angles(rsi_14.diff(), delta_x)
+    df['rsi_14_slope_angle_diff'] = rsi_14.diff()
+    df['rsi_14_slope_angle_diff_angle'] = get_angles(rsi_14.diff(), delta_x)
+
     df["rsi_14_sma_slope_angle"] = get_angles(rsi_14_sma.diff(), delta_x)
+    df['rsi_14_sma_slope_angle_diff'] = rsi_14_sma.diff()
+    df['rsi_14_sma_slope_angle_diff_angle'] = get_angles(rsi_14_sma.diff(), delta_x)
 
-    df["rsi_14_slope_angle_2"] = df["rsi_14_slope_angle"].shift()
-    df["rsi_14_sma_slope_angle_2"] = df["rsi_14_slope_angle"].shift()
+    df['rsi_14_close_sma_distance_slope_angle'] = get_angles(rsi_14_close_sma_distance.diff(), delta_x)
+    df['rsi_14_close_sma_distance_slope_angle_diff'] = rsi_14_close_sma_distance.diff()
+    df['rsi_14_close_sma_distance_slope_angle_diff_angle'] = get_angles(rsi_14_close_sma_distance.diff(), delta_x)
 
-    df["rsi_14_slope_angle_3"] = df["rsi_14_slope_angle"].shift(2)
-    df["rsi_14_sma_slope_angle_3"] = df["rsi_14_slope_angle"].shift(2)
-
-    # include atr rma
-    df["atr"] = ta.volatility.average_true_range(
-        df["high"], df["low"], df["close"], window=14, fillna=True
-    )
 
     # include ema 3
     ema_3 = ta.trend.ema_indicator(df["close"], window=3)
@@ -70,100 +86,125 @@ def add_indicators(df, delta_x=5):
     ema_13 = ta.trend.ema_indicator(df["close"], window=13)
     ema_21 = ta.trend.ema_indicator(df["close"], window=21)
 
-    df["avg_ema_3_slope_angle"] = get_angles(ema_3.diff(), delta_x)
-    df["avg_ema_5_slope_angle"] = get_angles(ema_5.diff(), delta_x)
-    df["avg_ema_8_slope_angle"] = get_angles(ema_8.diff(), delta_x)
-    df["avg_ema_13_slope_angle"] = get_angles(ema_13.diff(), delta_x)
-    df["avg_ema_21_slope_angle"] = get_angles(ema_21.diff(), delta_x)
+    df['ema_3_slope_angle'] = get_angles(ema_3.diff(), delta_x)
+    df['ema_3_slope_angle_diff'] = ema_3.diff()
+    df['ema_3_slope_angle_diff_angle'] = get_angles(ema_3.diff(), delta_x)
 
-    df["avg_ema_3_slope_angle_2"] = df["avg_ema_3_slope_angle"].shift()
-    df["avg_ema_5_slope_angle_2"] = df["avg_ema_5_slope_angle"].shift()
-    df["avg_ema_8_slope_angle_2"] = df["avg_ema_8_slope_angle"].shift()
-    df["avg_ema_13_slope_angle_2"] = df["avg_ema_13_slope_angle"].shift()
-    df["avg_ema_21_slope_angle_2"] = df["avg_ema_21_slope_angle"].shift()
+    df['ema_5_slope_angle'] = get_angles(ema_5.diff(), delta_x)
+    df['ema_5_slope_angle_diff'] = ema_5.diff()
+    df['ema_5_slope_angle_diff_angle'] = get_angles(ema_5.diff(), delta_x)
 
-    df["avg_ema_3_slope_angle_3"] = df["avg_ema_3_slope_angle"].shift(2)
-    df["avg_ema_5_slope_angle_3"] = df["avg_ema_5_slope_angle"].shift(2)
-    df["avg_ema_8_slope_angle_3"] = df["avg_ema_8_slope_angle"].shift(2)
-    df["avg_ema_13_slope_angle_3"] = df["avg_ema_13_slope_angle"].shift(2)
-    df["avg_ema_21_slope_angle_3"] = df["avg_ema_21_slope_angle"].shift(2)
+    df['ema_8_slope_angle'] = get_angles(ema_8.diff(), delta_x)
+    df['ema_8_slope_angle_diff'] = ema_8.diff()
+    df['ema_8_slope_angle_diff_angle'] = get_angles(ema_8.diff(), delta_x)
+
+    df['ema_13_slope_angle'] = get_angles(ema_13.diff(), delta_x)
+    df['ema_13_slope_angle_diff'] = ema_13.diff()
+    df['ema_13_slope_angle_diff_angle'] = get_angles(ema_13.diff(), delta_x)
+
+    df['ema_21_slope_angle'] = get_angles(ema_21.diff(), delta_x)
+    df['ema_21_slope_angle_diff'] = ema_21.diff()
+    df['ema_21_slope_angle_diff_angle'] = get_angles(ema_21.diff(), delta_x)
+
+    ema_3_5_distance = ema_3 - ema_5
+    ema_5_8_distance = ema_5 - ema_8
+    ema_8_13_distance = ema_8 - ema_13
+    ema_13_21_distance = ema_13 - ema_21
+
+    df['ema_3_5_distance_slope_angle'] = get_angles(ema_3_5_distance.diff(), delta_x)
+    df['ema_3_5_distance_slope_angle_diff'] = ema_3_5_distance.diff()
+    df['ema_3_5_distance_slope_angle_diff_angle'] = get_angles(ema_3_5_distance.diff(), delta_x)
+
+    df['ema_5_8_distance_slope_angle'] = get_angles(ema_5_8_distance.diff(), delta_x)
+    df['ema_5_8_distance_slope_angle_diff'] = ema_5_8_distance.diff()
+    df['ema_5_8_distance_slope_angle_diff_angle'] = get_angles(ema_5_8_distance.diff(), delta_x)
+
+    df['ema_8_13_distance_slope_angle'] = get_angles(ema_8_13_distance.diff(), delta_x)
+    df['ema_8_13_distance_slope_angle_diff'] = ema_8_13_distance.diff()
+    df['ema_8_13_distance_slope_angle_diff_angle'] = get_angles(ema_8_13_distance.diff(), delta_x)
+
+    df['ema_13_21_distance_slope_angle'] = get_angles(ema_13_21_distance.diff(), delta_x)
+    df['ema_13_21_distance_slope_angle_diff'] = ema_13_21_distance.diff()
+    df['ema_13_21_distance_slope_angle_diff_angle'] = get_angles(ema_13_21_distance.diff(), delta_x)
+
 
     # include MACD 6 3 5
     macd_6_13 = ta.trend.macd_diff(
         df["close"], window_slow=13, window_fast=16, window_sign=5, fillna=True
     )
+    df['macd_6_13_slope_angle'] = get_angles(macd_6_13.diff(), delta_x)
+    df['macd_6_13_slope_angle_diff'] = macd_6_13.diff()
+    df['macd_6_13_slope_angle_diff_angle'] = get_angles(macd_6_13.diff(), delta_x)
+
     macd_6_13_ema = ta.trend.ema_indicator(macd_6_13, window=5)
+    df['macd_6_13_ema_slope_angle'] = get_angles(macd_6_13_ema.diff(), delta_x)
+    df['macd_6_13_ema_slope_angle_diff'] = macd_6_13_ema.diff()
+    df['macd_6_13_ema_slope_angle_diff_angle'] = get_angles(macd_6_13_ema.diff(), delta_x)
 
-    df["macd_6_13_slope_angle"] = get_angles(macd_6_13.diff(), delta_x)
-    df["macd_6_13_ema_slope_angle"] = get_angles(macd_6_13_ema.diff(), delta_x)
-
-    df["macd_6_13_slope_angle_2"] = df["macd_6_13_slope_angle"].shift()
-    df["macd_6_13_ema_slope_angle_2"] = df["macd_6_13_ema_slope_angle"].shift()
-
-    df["macd_6_13_slope_angle_3"] = df["macd_6_13_slope_angle"].shift(2)
-    df["macd_6_13_ema_slope_angle_3"] = df["macd_6_13_ema_slope_angle"].shift(2)
+    macd_6_13_close_ema_distance = macd_6_13 - macd_6_13_ema
+    df['macd_6_13_close_ema_distance_slope_angle'] = get_angles(macd_6_13_close_ema_distance.diff(), delta_x)
+    df['macd_6_13_close_ema_distance_slope_angle_diff'] = macd_6_13_close_ema_distance.diff()
+    df['macd_6_13_close_ema_distance_slope_angle_diff_angle'] = get_angles(macd_6_13_close_ema_distance.diff(), delta_x)
 
     # include MACD 12 26 9
     macd_12_26 = ta.trend.macd_diff(
         df["close"], window_slow=26, window_fast=12, window_sign=9, fillna=True
     )
+    df['macd_12_26_slope_angle'] = get_angles(macd_12_26.diff(), delta_x)
+    df['macd_12_26_slope_angle_diff'] = macd_12_26.diff()
+    df['macd_12_26_slope_angle_diff_angle'] = get_angles(macd_12_26.diff(), delta_x)
+
+
     macd_12_26_ema = ta.trend.ema_indicator(macd_12_26, window=9)
+    df['macd_12_26_ema_slope_angle'] = get_angles(macd_12_26_ema.diff(), delta_x)
+    df['macd_12_26_ema_slope_angle_diff'] = macd_12_26_ema.diff()
+    df['macd_12_26_ema_slope_angle_diff_angle'] = get_angles(macd_12_26_ema.diff(), delta_x)
 
-    df["macd_12_26_slope_angle"] = get_angles(macd_12_26.diff(), delta_x)
-    df["macd_12_26_ema_slope_angle"] = get_angles(macd_12_26_ema.diff(), delta_x)
-
-    df["macd_12_26_slope_angle_2"] = df["macd_12_26_slope_angle"].shift()
-    df["macd_12_26_ema_slope_angle_2"] = df["macd_12_26_ema_slope_angle"].shift()
-
-    df["macd_12_26_slope_angle_3"] = df["macd_12_26_slope_angle"].shift(2)
-    df["macd_12_26_ema_slope_angle_3"] = df["macd_12_26_ema_slope_angle"].shift(2)
+    macd_12_26_close_ema_distance = macd_12_26 - macd_12_26_ema
+    df['macd_12_26_close_ema_distance_slope_angle'] = get_angles(macd_12_26_close_ema_distance.diff(), delta_x)
+    df['macd_12_26_close_ema_distance_slope_angle_diff'] = macd_12_26_close_ema_distance.diff()
+    df['macd_12_26_close_ema_distance_slope_angle_diff_angle'] = get_angles(macd_12_26_close_ema_distance.diff(), delta_x)
 
     # include stochastic 5 5 3
     stoch_5_5_k = ta.momentum.stoch(
         df["high"], df["low"], df["close"], window=5, smooth_window=5, fillna=True
     )
+    df['stoch_5_5_k_slope_angle'] = get_angles(stoch_5_5_k.diff(), delta_x)
+    df['stoch_5_5_k_slope_angle_diff'] = stoch_5_5_k.diff()
+    df['stoch_5_5_k_slope_angle_diff_angle'] = get_angles(stoch_5_5_k.diff(), delta_x)
+
     stoch_5_5_d = ta.trend.sma_indicator(stoch_5_5_k, window=3)
+    df['stoch_5_5_d_slope_angle'] = get_angles(stoch_5_5_d.diff(), delta_x)
+    df['stoch_5_5_d_slope_angle_diff'] = stoch_5_5_d.diff()
+    df['stoch_5_5_d_slope_angle_diff_angle'] = get_angles(stoch_5_5_d.diff(), delta_x)
 
-    df["stoch_5_5_k_slope_angle"] = get_angles(stoch_5_5_k.diff(), delta_x)
-    df["stoch_5_5_d_slope_angle"] = get_angles(stoch_5_5_d.diff(), delta_x)
-
-    df["stoch_5_5_k_slope_angle_2"] = df["stoch_5_5_k_slope_angle"].shift()
-    df["stoch_5_5_d_slope_angle_2"] = df["stoch_5_5_d_slope_angle"].shift()
-
-    df["stoch_5_5_k_slope_angle_3"] = df["stoch_5_5_k_slope_angle"].shift(2)
-    df["stoch_5_5_d_slope_angle_3"] = df["stoch_5_5_d_slope_angle"].shift(2)
+    stoch_5_5_k_d_distance = stoch_5_5_k - stoch_5_5_d
+    df['stoch_5_5_k_d_distance_slope_angle'] = get_angles(stoch_5_5_k_d_distance.diff(), delta_x)
+    df['stoch_5_5_k_d_distance_slope_angle_diff'] = stoch_5_5_k_d_distance.diff()
+    df['stoch_5_5_k_d_distance_slope_angle_diff_angle'] = get_angles(stoch_5_5_k_d_distance.diff(), delta_x)
 
     # include stochastic 10 10 6
     stoch_10_10_k = ta.momentum.stoch(
         df["high"], df["low"], df["close"], window=10, smooth_window=10, fillna=True
     )
+    df['stoch_10_10_k_slope_angle'] = get_angles(stoch_10_10_k.diff(), delta_x)
+    df['stoch_10_10_k_slope_angle_diff'] = stoch_10_10_k.diff()
+    df['stoch_10_10_k_slope_angle_diff_angle'] = get_angles(stoch_10_10_k.diff(), delta_x)
+
     stoch_10_10_d = ta.trend.sma_indicator(stoch_10_10_k, window=6)
+    df['stoch_10_10_d_slope_angle'] = get_angles(stoch_10_10_d.diff(), delta_x)
+    df['stoch_10_10_d_slope_angle_diff'] = stoch_10_10_d.diff()
+    df['stoch_10_10_d_slope_angle_diff_angle'] = get_angles(stoch_10_10_d.diff(), delta_x)
 
-    df["stoch_10_10_k_slope_angle"] = get_angles(stoch_10_10_k.diff(), delta_x)
-    df["stoch_10_10_d_slope_angle"] = get_angles(stoch_10_10_d.diff(), delta_x)
+    stoch_10_10_k_d_distance = stoch_10_10_k - stoch_10_10_d
+    df['stoch_10_10_k_d_distance_slope_angle'] = get_angles(stoch_10_10_k_d_distance.diff(), delta_x)
+    df['stoch_10_10_k_d_distance_slope_angle_diff'] = stoch_10_10_k_d_distance.diff()
+    df['stoch_10_10_k_d_distance_slope_angle_diff_angle'] = get_angles(stoch_10_10_k_d_distance.diff(), delta_x)
 
-    df["stoch_10_10_k_slope_angle_2"] = df["stoch_10_10_k_slope_angle"].shift()
-    df["stoch_10_10_d_slope_angle_2"] = df["stoch_10_10_d_slope_angle"].shift()
 
-    df["stoch_10_10_k_slope_angle_3"] = df["stoch_10_10_k_slope_angle"].shift(2)
-    df["stoch_10_10_d_slope_angle_3"] = df["stoch_10_10_d_slope_angle"].shift(2)
+    new_df = add_lookback(df, 5)
+    df = pd.concat([df, new_df], axis=1)
 
-    # Directional Indicator Plus 14
-    di_plus = ta.trend.adx_pos(
-        df["high"], df["low"], df["close"], window=7, fillna=True
-    )
-    di_minus = ta.trend.adx_neg(
-        df["high"], df["low"], df["close"], window=7, fillna=True
-    )
-
-    df["di_plus_slope_angle"] = get_angles(di_plus.diff(), delta_x)
-    df["di_minus_slope_angle"] = get_angles(di_minus.diff(), delta_x)
-
-    df["di_plus_slope_angle_2"] = df["di_plus_slope_angle"].shift()
-    df["di_minus_slope_angle_2"] = df["di_minus_slope_angle"].shift()
-
-    df["di_plus_slope_angle_3"] = df["di_plus_slope_angle"].shift(2)
-    df["di_minus_slope_angle_3"] = df["di_minus_slope_angle"].shift(2)
 
     # slope of the next candle
     df["next_close_slope_angle"] = get_angles(
