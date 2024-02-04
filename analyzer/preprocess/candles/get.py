@@ -1,7 +1,8 @@
 import requests
 from . import candles_to_df
 
-def get(symbol, n_candles=5000):
+
+def get(symbol="EURUSD", n_candles=5000):
     """
     Get candles for a symbol.
 
@@ -15,7 +16,7 @@ def get(symbol, n_candles=5000):
 
     Returns
     -------
-    list
+    pd.DataFrame
     """
     url = f"http://localhost:3005/api/candles?limit={n_candles}&filter[symbol]={symbol}"
     r = requests.get(url)
