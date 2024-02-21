@@ -14,7 +14,7 @@ def add(df: pd.DataFrame, n_lookback=9):
     """
 
     # ichimoku cloud
-    df = ichimoku(df, n_lookback=n_lookback)
+    ichimoku_df = ichimoku_angles(df, n_lookback=n_lookback)
 
     # bollinger bands
 

@@ -1,0 +1,142 @@
+//@version=5
+indicator("Custom Bias Oscillator with Signal Line", shorttitle="CBO-SL", overlay=false)
+
+// User inputs for selecting the number of periods for the oscillator and signal line
+oscillatorPeriods = input.int(7, "Oscillator Periods", minval=1)
+signalLinePeriods = input.int(7, "Signal Line Periods", minval=1)
+
+// Function to calculate the oscillator and signal line based on OHLC data of a specific timeframe
+getOscillatorAndSignalLine() =>
+    // Calculate Body Bias scaled to -100 to 100
+    bodyBias = ((close - open) / (high - low)) * 100
+
+    // Correct Wick Bias calculation scaled to -100 to 100
+    lowerWick = math.min(open, close) - low
+    upperWick = high - math.max(open, close)
+    totalWickLength = lowerWick + upperWick
+    wickBias = (lowerWick - upperWick) / totalWickLength * 100
+
+    // Ensure division by zero is handled for wickBias
+    wickBias := totalWickLength != 0 ? wickBias : na
+
+    // Calculate Overall Bias, which will also be in the range of -100 to 100
+    overallBias = (bodyBias + wickBias) / 2
+
+    // Smooth the overall bias with a moving average to create the oscillator based on user input
+    oscillator = ta.sma(overallBias, oscillatorPeriods)
+
+    // Calculate the signal line as a moving average of the oscillator, also based on user input, bounded within -100 to 100
+    signalLine = ta.sma(oscillator, signalLinePeriods)
+    signalLineBounded = math.min(math.max(signalLine, -100), 100)
+
+    [oscillator, signalLineBounded]
+
+
+getOscillatorAndSignalLine2(timeframe) =>
+    [oscillator, signalLineBounded] = request.security(syminfo.tickerid, timeframe, getOscillatorAndSignalLine(), lookahead = barmerge.lookahead_on)
+    [oscillator, signalLineBounded]
+
+
+// Retrieve oscillator and signal line values for different timeframes
+//[t_open, t_high, t_low, t_close] = getPrice("10")
+//plot(t_open, title="Open", color=color.blue)
+//plot(t_high, title="High", color=color.red)
+//plot(t_low, title="Low", color=color.orange)
+//plot(t_close, title="Close", color=color.green)
+//[t_open_20, t_high_20, t_low_20, t_close_20] = getPrice("20")
+//plot(t_open_20, title="Open", color=color.blue)
+//plot(t_high_20, title="High", color=color.red)
+//plot(t_low_20, title="Low", color=color.orange)
+//plot(t_close_20, title="Close", color=color.green)
+//[t_open_30, t_high_30, t_low_30, t_close_30] = getPrice("30")
+//plot(t_open_30, title="Open", color=color.blue)
+//plot(t_high_30, title="High", color=color.red)
+//plot(t_low_30, title="Low", color=color.orange)
+//plot(t_close_30, title="Close", color=color.green)
+
+// Create a table to display oscillator and signal line values for different timeframes
+var tableData = table.new(position = position.bottom_right, columns = 6, rows = 10)
+
+[m10_oscillator, m10_signalLine] = getOscillatorAndSignalLine2("10")
+table.cell(tableData, 0, 0, "10m")
+table.cell(tableData, 0, 1, str.tostring(m10_oscillator, '#.##') + " / " + str.tostring(m10_signalLine, '#.##'), text_color=color.white)
+
+[m20_oscillator, m20_signalLine] = getOscillatorAndSignalLine2("20")
+table.cell(tableData, 1, 0, "20m")
+table.cell(tableData, 1, 1, str.tostring(m20_oscillator, '#.##') + " / " + str.tostring(m20_signalLine, '#.##'), text_color=color.white)
+
+[m30_oscillator, m30_signalLine] = getOscillatorAndSignalLine2("30")
+table.cell(tableData, 2, 0, "30m")
+table.cell(tableData, 2, 1, str.tostring(m30_oscillator, '#.##') + " / " + str.tostring(m30_signalLine, '#.##'), text_color=color.white)
+
+[m40_oscillator, m40_signalLine] = getOscillatorAndSignalLine2("40")
+table.cell(tableData, 3, 0, "40m")
+table.cell(tableData, 3, 1, str.tostring(m40_oscillator, '#.##') + " / " + str.tostring(m40_signalLine, '#.##'), text_color=color.white)
+
+[m50_oscillator, m50_signalLine] = getOscillatorAndSignalLine2("50")
+table.cell(tableData, 4, 0, "50m")
+table.cell(tableData, 4, 1, str.tostring(m50_oscillator, '#.##') + " / " + str.tostring(m50_signalLine, '#.##'), text_color=color.white)
+
+[m60_oscillator, m60_signalLine] = getOscillatorAndSignalLine2("60")
+table.cell(tableData, 5, 0, "60m")
+table.cell(tableData, 5, 1, str.tostring(m60_oscillator, '#.##') + " / " + str.tostring(m60_signalLine, '#.##'), text_color=color.white)
+
+[m70_oscillator, m70_signalLine] = getOscillatorAndSignalLine2("70")
+table.cell(tableData, 0, 2, "70m")
+table.cell(tableData, 0, 3, str.tostring(m70_oscillator, '#.##') + " / " + str.tostring(m70_signalLine, '#.##'), text_color=color.white)
+
+[m80_oscillator, m80_signalLine] = getOscillatorAndSignalLine2("80")
+table.cell(tableData, 1, 2, "80m")
+table.cell(tableData, 1, 3, str.tostring(m80_oscillator, '#.##') + " / " + str.tostring(m80_signalLine, '#.##'), text_color=color.white)
+
+[m90_oscillator, m90_signalLine] = getOscillatorAndSignalLine2("90")
+table.cell(tableData, 2, 2, "90m")
+table.cell(tableData, 2, 3, str.tostring(m90_oscillator, '#.##') + " / " + str.tostring(m90_signalLine, '#.##'), text_color=color.white)
+
+[m100_oscillator, m100_signalLine] = getOscillatorAndSignalLine2("100")
+table.cell(tableData, 3, 2, "100m")
+table.cell(tableData, 3, 3, str.tostring(m100_oscillator, '#.##') + " / " + str.tostring(m100_signalLine, '#.##'), text_color=color.white)
+
+[m110_oscillator, m110_signalLine] = getOscillatorAndSignalLine2("110")
+table.cell(tableData, 4, 2, "110m")
+table.cell(tableData, 4, 3, str.tostring(m110_oscillator, '#.##') + " / " + str.tostring(m110_signalLine, '#.##'), text_color=color.white)
+
+[m120_oscillator, m120_signalLine] = getOscillatorAndSignalLine2("120")
+table.cell(tableData, 5, 2, "120m")
+table.cell(tableData, 5, 3, str.tostring(m120_oscillator, '#.##') + " / " + str.tostring(m120_signalLine, '#.##'), text_color=color.white)
+
+[m160_oscillator, m160_signalLine] = getOscillatorAndSignalLine2("160")
+table.cell(tableData, 0, 4, "160m")
+table.cell(tableData, 0, 5, str.tostring(m160_oscillator, '#.##') + " / " + str.tostring(m160_signalLine, '#.##'), text_color=color.white)
+
+[m200_oscillator, m200_signalLine] = getOscillatorAndSignalLine2("200")
+table.cell(tableData, 1, 4, "200m")
+table.cell(tableData, 1, 5, str.tostring(m200_oscillator, '#.##') + " / " + str.tostring(m200_signalLine, '#.##'), text_color=color.white)
+
+[m240_oscillator, m240_signalLine] = getOscillatorAndSignalLine2("240")
+table.cell(tableData, 2, 4, "240m")
+table.cell(tableData, 2, 5, str.tostring(m240_oscillator, '#.##') + " / " + str.tostring(m240_signalLine, '#.##'), text_color=color.white)
+
+[m280_oscillator, m280_signalLine] = getOscillatorAndSignalLine2("280")
+table.cell(tableData, 3, 4, "280m")
+table.cell(tableData, 3, 5, str.tostring(m280_oscillator, '#.##') + " / " + str.tostring(m280_signalLine, '#.##'), text_color=color.white)
+
+[m320_oscillator, m320_signalLine] = getOscillatorAndSignalLine2("320")
+table.cell(tableData, 4, 4, "320m")
+table.cell(tableData, 4, 5, str.tostring(m320_oscillator, '#.##') + " / " + str.tostring(m320_signalLine, '#.##'), text_color=color.white)
+
+[m360_oscillator, m360_signalLine] = getOscillatorAndSignalLine2("360")
+table.cell(tableData, 5, 4, "360m")
+table.cell(tableData, 5, 5, str.tostring(m360_oscillator, '#.##') + " / " + str.tostring(m360_signalLine, '#.##'), text_color=color.white)
+
+[m400_oscillator, m400_signalLine] = getOscillatorAndSignalLine2("400")
+table.cell(tableData, 0, 6, "400m")
+table.cell(tableData, 0, 7, str.tostring(m400_oscillator, '#.##') + " / " + str.tostring(m400_signalLine, '#.##'), text_color=color.white)
+
+[m440_oscillator, m440_signalLine] = getOscillatorAndSignalLine2("440")
+table.cell(tableData, 1, 6, "440m")
+table.cell(tableData, 1, 7, str.tostring(m440_oscillator, '#.##') + " / " + str.tostring(m440_signalLine, '#.##'), text_color=color.white)
+
+[m480_oscillator, m480_signalLine] = getOscillatorAndSignalLine2("480")
+table.cell(tableData, 2, 6, "480m")
+table.cell(tableData, 2, 7, str.tostring(m480_oscillator, '#.##') + " / " + str.tostring(m480_signalLine, '#.##'), text_color=color.white)
