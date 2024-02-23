@@ -1,9 +1,3 @@
-/**
- * @typedef {object} Symbol
- * @property {string} name
- * @property {string} description
- */
-
 import db from '@src/db';
 import format from 'pg-format';
 
