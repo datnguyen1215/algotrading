@@ -1,11 +1,3 @@
-/**
- * @typedef {object} Settings
- * @property {object} database
- * @property {string} database.connectionString
- * @property {object} http
- * @property {string} http.host
- * @property {number} http.port
- */
 import 'dotenv/config';
 import errors from './errors';
 

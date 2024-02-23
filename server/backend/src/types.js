@@ -13,3 +13,12 @@
  * @property {string} name
  * @property {string} description
  */
+
+/**
+ * @typedef {object} Settings
+ * @property {object} database
+ * @property {string} database.connectionString
+ * @property {object} http
+ * @property {string} http.host
+ * @property {number} http.port
+ */
