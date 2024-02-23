@@ -1,9 +1,13 @@
 import { Router } from 'express';
 
 const v1 = () => {
-  const app = Router();
+  const route = Router();
 
-  return app;
+  route.get('/', (req, res) => {
+    res.json({ message: 'Welcome to the API' });
+  });
+
+  return route;
 };
 
 export default v1;

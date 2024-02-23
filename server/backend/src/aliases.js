@@ -1,5 +1,5 @@
-import moduleAlias from "module-alias";
+import moduleAlias from 'module-alias';
 
 moduleAlias.addAliases({
-  "@src": __dirname
+  '@src': __dirname
 });

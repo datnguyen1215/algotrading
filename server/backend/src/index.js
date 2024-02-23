@@ -1,8 +1,17 @@
-import 'dotenv/config';
-import './aliases';
+import settings from '@src/settings';
 import http from './http';
+import observability from './observability';
 
 (async () => {
-  await http.start();
-  await http.stop();
+  observability.tracer.startActiveSpan('main', async span => {
+    try {
+      span.setAttributes({ settings });
+      await http.start();
+      span.end();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      span.end();
+    }
+  });
 })();
