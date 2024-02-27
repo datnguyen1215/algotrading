@@ -7,9 +7,9 @@
     "dev": "nodemon --watch src/ --exec npm run start",
     "start": "node --require @babel/register --require ./src/aliases.js --require dotenv/config src/index.js",
     "db:reset": "export $(xargs < .env) && npm run db:cleanup && npm run db:schema && npm run db:seeds",
-    "db:cleanup": "export $(xargs < .env) && psql -f setup/database/cleanup.sql $POSTGRES_CONNECTION_STRING",
-    "db:schema": "export $(xargs < .env) && psql -f setup/database/schema.sql $POSTGRES_CONNECTION_STRING",
-    "db:seeds": "export $(xargs < .env) && psql -f setup/database/seeds.sql $POSTGRES_CONNECTION_STRING",
+    "db:cleanup": "export $(xargs < .env) && psql -f setup/database/cleanup.sql $DATABASE_CONNECTION_STRING",
+    "db:schema": "export $(xargs < .env) && psql -f setup/database/schema.sql $DATABASE_CONNECTION_STRING",
+    "db:seeds": "export $(xargs < .env) && psql -f setup/database/seeds.sql $DATABASE_CONNECTION_STRING",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
