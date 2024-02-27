@@ -6,8 +6,6 @@
 
 import http from 'http';
 import express from 'express';
-import observability from '@src/observability';
-import utils from '@src/utils';
 
 /**
  * Create an HTTP server
@@ -22,29 +20,16 @@ const create = config => {
    * @returns {Promise<void>}
    */
   const start = async () => {
-    return observability.tracer.startActiveSpan(
-      'http.server.create.start',
-      async span => {
-        return new Promise((resolve, reject) => {
-          span.setAttributes(utils.flatten({ config }));
-          server.listen(config.port, config.host, err => {
-            if (err) {
-              span.addEvent('server.error', {
-                message: err.message,
-                stack: err.stack
-              });
-              span.end();
-              reject(err);
-              return;
-            }
+    return new Promise((resolve, reject) => {
+      server.listen(config.port, config.host, err => {
+        if (err) {
+          reject(err);
+          return;
+        }
 
-            span.addEvent('server.listening');
-            resolve();
-            span.end();
-          });
-        });
-      }
-    );
+        resolve();
+      });
+    });
   };
 
   /**
@@ -52,28 +37,16 @@ const create = config => {
    * @returns {Promise<void>}
    */
   const stop = async () => {
-    return observability.tracer.startActiveSpan(
-      'http.server.create.stop',
-      async span => {
-        return new Promise((resolve, reject) => {
-          server.close(err => {
-            if (err) {
-              span.addEvent('server.error', {
-                message: err.message,
-                stack: err.stack
-              });
-              reject(err);
-              span.end();
-              return;
-            }
+    return new Promise((resolve, reject) => {
+      server.close(err => {
+        if (err) {
+          reject(err);
+          return;
+        }
 
-            span.addEvent('server.closed');
-            span.end();
-            resolve();
-          });
-        });
-      }
-    );
+        resolve();
+      });
+    });
   };
 
   return {

@@ -24,17 +24,6 @@ const get = () => {
     http: {
       host: process.env.HTTP_HOST || 'localhost',
       port: process.env.HTTP_PORT || 3000
-    },
-    observability: {
-      tracing: {
-        endpoint: process.env.OBSERVABILITY_ENDPOINT,
-        service: {
-          name:
-            process.env.OBSERVABILITY_SERVICE_NAME ||
-            'algotrading.server.backend',
-          version: process.env.OBSERVABILITY_SERVICE_VERSION || '1.0.0'
-        }
-      }
     }
   };
 };
