@@ -1,3 +1,4 @@
 import http from './http';
 import database from './database';
-export default { http, database };
+import sql from './sql.js';
+export default { http, database, sql };
