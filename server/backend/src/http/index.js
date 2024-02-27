@@ -13,6 +13,14 @@ let instance = server.create({
 });
 
 /**
+ * Handle errors.
+ */
+const onError = (err, req, res, next) => {
+  logger.error(err);
+  res.status(err.status || 500).json({ message: err.message, code: err.code });
+};
+
+/**
  * Start the HTTP server
  */
 const start = async () => {
@@ -23,11 +31,16 @@ const start = async () => {
     logger.info(`Configuring /api`);
     instance.express.use('/api', api());
 
+    logger.info(`Configuring error handler`);
+    instance.express.use(onError);
+
     logger.info(`Starting server...`);
     await instance.start();
     logger.info(`Server started at ${JSON.stringify(settings.http)}`);
   } catch (err) {
-    throw new errors.create(errors.codes.http.UNABLE_TO_START, err.message);
+    throw new errors.create(err.message, {
+      code: errors.codes.http.UNABLE_TO_START
+    });
   }
 };
 
@@ -40,7 +53,9 @@ const stop = async () => {
     await instance.stop();
     logger.info(`Server stopped`);
   } catch (err) {
-    throw new errors.create(errors.codes.http.UNABLE_TO_STOP, err.message);
+    throw new errors.create(err.message, {
+      code: errors.codes.http.UNABLE_TO_STOP
+    });
   }
 };
 

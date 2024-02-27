@@ -1,10 +1,11 @@
 import loglevel from 'loglevel';
 import format from './format';
 import timestamp from './timestamp';
+import settings from '@src/settings';
 
 const create = name => {
   const logger = loglevel.getLogger(name);
-  logger.setLevel('info');
+  logger.setLevel(settings.logging.level);
 
   const debug = (...args) =>
     logger.debug(

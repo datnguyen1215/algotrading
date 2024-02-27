@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch src/ --exec npm run start",
-    "start": "node --require @babel/register --require ./src/aliases.js --require dotenv/config src/index.js",
+    "start": "babel-node src/index.js",
     "db:reset": "export $(xargs < .env) && npm run db:cleanup && npm run db:schema && npm run db:seeds",
     "db:cleanup": "export $(xargs < .env) && psql -f setup/database/cleanup.sql $DATABASE_CONNECTION_STRING",
     "db:schema": "export $(xargs < .env) && psql -f setup/database/schema.sql $DATABASE_CONNECTION_STRING",
     "db:seeds": "export $(xargs < .env) && psql -f setup/database/seeds.sql $DATABASE_CONNECTION_STRING",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --require @babel/register --require ./src/aliases.js --require dotenv/config --exit",
+    "test:all": "npm test tests/**/*.test.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +20,9 @@
     "@babel/node": "^7.23.9",
     "@babel/preset-env": "^7.23.9",
     "@babel/register": "^7.23.7",
-    "expressjs": "^1.0.1",
+    "axios": "^1.6.7",
+    "chai": "^4.3.7",
+    "mocha": "^10.3.0",
     "nodemon": "^3.0.3"
   },
   "dependencies": {
@@ -27,8 +30,10 @@
     "@opentelemetry/auto-instrumentations-node": "^0.41.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.48.0",
     "@opentelemetry/sdk-trace-node": "^1.21.0",
+    "date-format": "^4.0.14",
     "dotenv": "^16.4.4",
     "express": "^4.18.2",
+    "loglevel": "^1.9.1",
     "module-alias": "^2.2.3",
     "pg": "^8.11.3",
     "pg-format": "^1.0.4"

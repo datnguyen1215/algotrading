@@ -1,2 +1,3 @@
 import log from './log';
-export default { log };
+import wrapper from './wrapper';
+export default { log, wrapper };

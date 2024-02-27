@@ -1,4 +1,13 @@
 /**
+ * @typedef {object} GetCandlesOptions
+ * @property {string} symbol - the symbol of the asset
+ * @property {string} from - the start timestamp
+ * @property {string} to - the end timestamp
+ * @property {number} limit - the maximum number of candles to return
+ * @property {number} offset - the number of candles to skip
+ */
+
+/**
  * @typedef {object} Candle
  * @property {string} symbol - the symbol of the asset
  * @property {number} time - the timestamp of the candle
@@ -21,4 +30,6 @@
  * @property {object} http
  * @property {string} http.host
  * @property {number} http.port
+ * @property {object} logging
+ * @property {string} logging.level
  */

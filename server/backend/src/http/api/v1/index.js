@@ -1,11 +1,10 @@
 import { Router } from 'express';
+import candles from './candles';
 
 const v1 = () => {
   const route = Router();
 
-  route.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the API' });
-  });
+  route.use('/candles', candles());
 
   return route;
 };

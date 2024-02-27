@@ -1,3 +1,5 @@
+import 'dotenv/config'
+import './aliases';
 import settings from '@src/settings';
 import http from './http';
 import logging from './logging';
