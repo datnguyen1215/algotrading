@@ -27,8 +27,7 @@ const extractQuery = query => {
 };
 
 /**
- *
- * @returns
+ * Create GET /api/v1/candles handler.
  */
 const get = () => async (req, res) => {
   const { symbol, interval, limit, offset, from, to } = extractQuery(req.query);
@@ -45,16 +44,15 @@ const get = () => async (req, res) => {
       status: 400
     });
 
-  const tf_candle = db.candles[interval];
-
-  if (!tf_candle)
+  if (!interval)
     throw errors.create(`Invalid interval: ${interval}`, {
       code: errors.codes.http.INVALID_INTERVAL,
       status: 400
     });
 
-  const candles = await tf_candle.get({
+  const candles = await db.candles.get({
     symbol,
+    interval,
     limit,
     offset,
     from,
