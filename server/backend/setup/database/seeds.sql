@@ -1,4 +1,6 @@
 INSERT INTO symbols (name, description) VALUES ('SYMBOLTEST', 'Test Symbol');
+INSERT INTO symbols (name, description) VALUES ('SYMBOLTEST2', 'Test Symbol 2');
+INSERT INTO symbols (name, description) VALUES ('SYMBOLTEST3', 'Test Symbol 3');
 
 INSERT INTO candles_m1 (open, high, low, close, time, symbol) VALUES (1.0, 1.1, 0.9, 1.0, '2021-01-01 00:00:00Z', 'SYMBOLTEST');
 INSERT INTO candles_m1 (open, high, low, close, time, symbol) VALUES (1.0, 1.1, 0.9, 1.0, '2021-01-01 00:01:00Z', 'SYMBOLTEST');
