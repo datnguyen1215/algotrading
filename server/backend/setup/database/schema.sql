@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS candles_m1 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
 
 CREATE TABLE IF NOT EXISTS candles_m5 (
@@ -22,7 +23,8 @@ CREATE TABLE IF NOT EXISTS candles_m5 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
 
 CREATE TABLE IF NOT EXISTS candles_m15 (
@@ -31,7 +33,8 @@ CREATE TABLE IF NOT EXISTS candles_m15 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
 
 CREATE TABLE IF NOT EXISTS candles_m30 (
@@ -40,7 +43,8 @@ CREATE TABLE IF NOT EXISTS candles_m30 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
 
 CREATE TABLE IF NOT EXISTS candles_h1 (
@@ -49,7 +53,8 @@ CREATE TABLE IF NOT EXISTS candles_h1 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
 
 CREATE TABLE IF NOT EXISTS candles_h4 (
@@ -58,7 +63,8 @@ CREATE TABLE IF NOT EXISTS candles_h4 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
 
 CREATE TABLE IF NOT EXIStS candles_d1 (
@@ -67,5 +73,6 @@ CREATE TABLE IF NOT EXIStS candles_d1 (
   low NUMERIC NOT NULL,
   close NUMERIC NOT NULL,
   time TIMESTAMPTZ NOT NULL,
-  symbol TEXT REFERENCES symbols(name) NOT NULL
+  symbol TEXT NOT NULL,
+  FOREIGN KEY (symbol) REFERENCES symbols(name)
 );
