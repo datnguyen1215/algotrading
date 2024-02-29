@@ -6,10 +6,7 @@ const eq = (column, value) => {
       code: errors.codes.sql.INVALID_CONDITION
     });
 
-  if (!value)
-    throw errors.create('value is required', {
-      code: errors.codes.sql.INVALID_CONDITION
-    });
+  if (!value || value == 'NULL') return '';
 
   return `${column} = ${value}`;
 };

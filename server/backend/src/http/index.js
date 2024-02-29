@@ -16,7 +16,7 @@ let instance = server.create({
  * Handle errors.
  */
 const onError = (err, req, res, next) => {
-  logger.error(err);
+  logger.error(err.stack || err.message);
   res.status(err.status || 500).json({ message: err.message, code: err.code });
 };
 

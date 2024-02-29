@@ -1,2 +1,3 @@
 import add from './add';
-export default add;
+import get from './get';
+export default { add, get };
