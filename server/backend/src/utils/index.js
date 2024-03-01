@@ -1,2 +1,3 @@
 import flatten from './flatten';
-export default { flatten };
+import sql from './sql';
+export default { flatten, sql };
