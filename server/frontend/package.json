@@ -29,6 +29,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"dotenv": "^16.4.5"
+		"axios": "^1.6.7",
+		"dotenv": "^16.4.5",
+		"highcharts": "^11.3.0"
 	}
 }
