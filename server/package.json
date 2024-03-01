@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "date-format": "^4.0.14",
-    "loglevel": "^1.9.1"
-  }
-}
