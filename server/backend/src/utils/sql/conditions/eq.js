@@ -6,7 +6,7 @@ const eq = (column, value) => {
       code: errors.codes.sql.INVALID_CONDITION
     });
 
-  if (!value || value == 'NULL') return '';
+  if (!value) return '';
 
   return `${column} = ${value}`;
 };
