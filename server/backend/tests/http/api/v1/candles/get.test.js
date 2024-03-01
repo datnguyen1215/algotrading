@@ -14,7 +14,7 @@ describe('GET /api/v1/candles', () => {
     } catch (error) {
       expect(error.response.status).to.equal(400);
       expect(error.response.data.code).to.equal(
-        errors.codes.http.INVALID_SYMBOL
+        errors.codes.options.INVALID_SYMBOL
       );
     }
   });
@@ -24,7 +24,9 @@ describe('GET /api/v1/candles', () => {
       await axios.get(url, { params: { symbol: 'SYMBOLTEST' } });
     } catch (error) {
       expect(error.response.status).to.equal(400);
-      expect(error.response.data.code).to.equal(errors.codes.http.INVALID_FROM);
+      expect(error.response.data.code).to.equal(
+        errors.codes.options.INVALID_FROM
+      );
     }
   });
 
@@ -36,7 +38,7 @@ describe('GET /api/v1/candles', () => {
     } catch (error) {
       expect(error.response.status).to.equal(400);
       expect(error.response.data.code).to.equal(
-        errors.codes.http.INVALID_INTERVAL
+        errors.codes.options.INVALID_INTERVAL
       );
     }
   });

@@ -27,11 +27,30 @@ const GRANULARITY_MAP = {
 const get = async options => {
   const { symbol, interval, from, to, limit, offset } = options;
 
+  if (!symbol)
+    throw errors.create(`Invalid symbol: ${symbol}`, {
+      code: errors.codes.options.INVALID_SYMBOL,
+      status: 400
+    });
+
+  if (!from)
+    throw errors.create(`Invalid from: ${from}`, {
+      code: errors.codes.options.INVALID_FROM,
+      status: 400
+    });
+
+  if (!interval)
+    throw errors.create(`Invalid interval: ${interval}`, {
+      code: errors.codes.options.INVALID_INTERVAL,
+      status: 400
+    });
+
   const table = GRANULARITY_MAP[interval];
 
   if (!table)
-    throw errors.create(`Table doesn't exist`, {
-      code: errors.codes.database.TABLE_DOES_NOT_EXIST
+    throw errors.create(`Invalid interval: ${interval}`, {
+      code: errors.codes.options.INVALID_INTERVAL,
+      status: 400
     });
 
   const where = sql.where(

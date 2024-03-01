@@ -32,24 +32,6 @@ const extractQuery = query => {
 const get = () => async (req, res) => {
   const { symbol, interval, limit, offset, from, to } = extractQuery(req.query);
 
-  if (!symbol)
-    throw errors.create(`Invalid symbol: ${symbol}`, {
-      code: errors.codes.http.INVALID_SYMBOL,
-      status: 400
-    });
-
-  if (!from)
-    throw errors.create(`Invalid from: ${from}`, {
-      code: errors.codes.http.INVALID_FROM,
-      status: 400
-    });
-
-  if (!interval)
-    throw errors.create(`Invalid interval: ${interval}`, {
-      code: errors.codes.http.INVALID_INTERVAL,
-      status: 400
-    });
-
   const candles = await db.candles.get({
     symbol,
     interval,
