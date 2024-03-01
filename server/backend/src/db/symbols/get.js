@@ -4,7 +4,7 @@ import sql from '@src/utils/sql';
 
 const get = async options => {
   const conditions = sql.where(
-    sql.conditions.eq('name', format('%L', options.symbol))
+    sql.conditions.eq('name', sql.literal(options.symbol))
   );
 
   const query = format('SELECT * FROM symbols %s', conditions);

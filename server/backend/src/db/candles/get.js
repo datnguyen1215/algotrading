@@ -36,9 +36,9 @@ const get = async options => {
 
   const where = sql.where(
     sql.and(
-      sql.conditions.eq('symbol', format('%L', symbol)),
-      sql.conditions.ge('time', format('%L', from)),
-      sql.conditions.le('time', format('%L', to))
+      sql.conditions.eq('symbol', sql.literal(symbol)),
+      sql.conditions.ge('time', sql.literal(from)),
+      sql.conditions.le('time', sql.literal(to))
     )
   );
 
