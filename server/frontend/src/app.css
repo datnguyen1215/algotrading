@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer components {
+  html, body {
+    @apply bg-gray-100 h-full;
+  }
+
   .error {
     @apply text-red-500 font-bold;
   }
