@@ -15,35 +15,38 @@
 
   let symbols = [];
 
-  onMount(() => {
-    (async () => {
-      try {
-        const result = await api.v1.symbols.get();
-        symbols = result.map(x => x.name);
-      } catch (err) {
-        error = {
-          show: true,
-          message: err.message
-        };
-      } finally {
-        spinner = {
-          show: false,
-          message: ''
-        };
-      }
-    })();
+  const onSymbolClicked = symbol => {
+    console.log(symbol);
+  };
+
+  onMount(async () => {
+    try {
+      symbols = await api.v1.symbols.get();
+    } catch (err) {
+      error = {
+        show: true,
+        message: err.message
+      };
+    } finally {
+      spinner = {
+        show: false,
+        message: ''
+      };
+    }
   });
 </script>
 
 <div>
   {#if symbols.length}
-    <ul>
-      <h2>Symbols</h2>
+    <h2 class="py-5 text-center font-bold pointer-events-none select-none">Symbols</h2>
 
+    <div>
       {#each symbols as symbol}
-        <li>{symbol}</li>
+        <button on:click={() => onSymbolClicked(symbol)} class="block">
+          <span class="px-5 hover:bg-gray-200 select-none">{symbol.name}</span>
+        </button>
       {/each}
-    </ul>
+    </div>
   {/if}
 
   {#if spinner.show}

@@ -1,6 +1,5 @@
 <script>
   import HighChart from './HighChart.svelte';
-  import Sidebar from './Sidebar/Container.svelte';
   import { onMount } from 'svelte';
   import api from '$lib/api';
 
@@ -10,7 +9,6 @@
   });
 </script>
 
-<div>
-  <Sidebar />
+<div class="w-full h-full">
   <HighChart />
 </div>

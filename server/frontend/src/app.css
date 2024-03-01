@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer components {
-  html, body {
+  html,
+  body {
     @apply bg-gray-100 h-full;
   }
 
