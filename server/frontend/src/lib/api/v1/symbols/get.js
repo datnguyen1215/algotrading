@@ -1,8 +1,3 @@
-/**
- * @typedef {object} Symbol
- * @property {string} symbol
- * @property {string} name
- */
 import axios from 'axios';
 
 /**

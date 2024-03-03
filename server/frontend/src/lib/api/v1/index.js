@@ -1,2 +1,3 @@
 import symbols from './symbols';
-export default { symbols };
+import candles from './candles';
+export default { symbols, candles };

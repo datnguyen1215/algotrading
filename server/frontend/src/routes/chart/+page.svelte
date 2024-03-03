@@ -1,11 +1,11 @@
 <script>
-  import ChartContainer from '$lib/components/Chart/Container.svelte';
-  import SymbolList from '$lib/components/Common/SymbolList.svelte';
+  import SymbolList from './lib/components/SymbolList.svelte';
+  import symbols from '$lib/stores/symbols';
 </script>
 
 <div class="flex w-full h-full">
-  <ChartContainer />
+  <!-- <ChartContainer symbol={$symbol} /> -->
   <div class="w-fit max-w-[300px] h-full">
-    <SymbolList />
+    <SymbolList symbols={$symbols} />
   </div>
 </div>
